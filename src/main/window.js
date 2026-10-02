@@ -20,9 +20,11 @@ const SIDEBAR_W_COLLAPSED = 58;
 const PAD = 6;
 const ALLOWED_SCHEMES = /^(https?|file|nevix|view-source|about|data|blob|chrome-extension|devtools):/i;
 
+const { DARK, LIGHT, PRIVATE } = require('./theme');
 const THEME = {
-  dark: { bg: '#15151c', symbol: '#e9e9f2' },
-  light: { bg: '#eceef4', symbol: '#1d1d26' },
+  dark: { bg: DARK['color-background'], symbol: DARK['color-text'] },
+  light: { bg: LIGHT['color-background'], symbol: LIGHT['color-text'] },
+  private: { bg: PRIVATE['color-background'], symbol: DARK['color-text'] },
 };
 
 let tabSeq = 0;
@@ -102,7 +104,7 @@ class Tab {
   paintBackground(url) {
     if (!this.view) return;
     const internal = /^nevix:/.test(url || '');
-    this.view.setBackgroundColor(internal ? (this.win.isDark() ? '#12121a' : '#f3f4f9') : '#ffffff');
+    this.view.setBackgroundColor(internal ? (this.win.isPrivate ? THEME.private.bg : this.win.isDark() ? THEME.dark.bg : THEME.light.bg) : '#ffffff');
   }
 
   load(url) {
@@ -305,10 +307,10 @@ class NevixWindow {
       minWidth: 480, minHeight: 360,
       show: false,
       title: 'Nevix',
-      backgroundColor: this.isPrivate ? '#1a1326' : dark ? THEME.dark.bg : THEME.light.bg,
+      backgroundColor: this.isPrivate ? THEME.private.bg : dark ? THEME.dark.bg : THEME.light.bg,
       titleBarStyle: 'hidden',
-      ...(IS_MAC ? { trafficLightPosition: { x: 14, y: 13 } } : { titleBarOverlay: { color: dark ? THEME.dark.bg : THEME.light.bg, symbolColor: dark ? THEME.dark.symbol : THEME.light.symbol, height: TABSTRIP_H } }),
-      icon: path.join(__dirname, '..', '..', 'assets', 'icon.png'),
+      ...(IS_MAC ? { trafficLightPosition: { x: 14, y: 13 } } : { titleBarOverlay: { color: this.isPrivate ? THEME.private.bg : dark ? THEME.dark.bg : THEME.light.bg, symbolColor: dark ? THEME.dark.symbol : THEME.light.symbol, height: TABSTRIP_H } }),
+      icon: path.join(__dirname, '..', '..', 'assets', 'app-icon.png'),
     });
     this.win.removeMenu && !IS_MAC && this.win.removeMenu();
 
@@ -356,10 +358,10 @@ class NevixWindow {
 
   applyTheme() {
     const dark = this.isDark();
-    const t = dark ? THEME.dark : THEME.light;
+    const t = this.isPrivate ? THEME.private : dark ? THEME.dark : THEME.light;
     if (!this.alive) return;
-    this.win.setBackgroundColor(this.isPrivate ? '#1a1326' : t.bg);
-    if (!IS_MAC) { try { this.win.setTitleBarOverlay({ color: this.isPrivate ? '#1a1326' : t.bg, symbolColor: t.symbol, height: TABSTRIP_H }); } catch {} }
+    this.win.setBackgroundColor(t.bg);
+    if (!IS_MAC) { try { this.win.setTitleBarOverlay({ color: t.bg, symbolColor: t.symbol, height: TABSTRIP_H }); } catch {} }
   }
 
   get active() { return this.tabs.find((t) => t.id === this.activeId) || null; }

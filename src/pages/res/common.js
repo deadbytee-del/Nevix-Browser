@@ -13,7 +13,7 @@
   };
   const hue = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; };
   const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
-  const fav = (url) => { const h = hostOf(url); const f = el('span', { class: 'fav' }, (h[0] || '•').toUpperCase()); f.style.background = `hsl(${hue(h)} 45% 42%)`; return f; };
+  const fav = (url) => { const h = hostOf(url); const f = el('span', { class: 'fav' }, (h[0] || '•').toUpperCase()); f.style.background = 'var(--color-surface-tertiary)'; f.style.color = 'var(--color-primary-text)'; return f; };
   const PATHS = {
     shield: 'M12 21s8-3.5 8-10V5.5L12 3 4 5.5V11c0 6.5 8 10 8 10z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
     star: 'M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.9l1.1-6.5L2.6 9.8l6.5-.9z', download: 'M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14',
@@ -30,6 +30,6 @@
   const bytes = (n) => n > 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n > 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n > 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B';
   const call = (c, a) => window.nevix.call(c, a);
   // apply accent
-  call('settings:get').then((s) => { document.documentElement.style.setProperty('--accent', s.general.accent); }).catch(() => {});
+  call('settings:get').then((s) => { if (s.general.accent) document.documentElement.style.setProperty('--color-primary', s.general.accent); }).catch(() => {});
   window.NX = { $, el, hue, hostOf, fav, icon, num, bytes, call };
 })();

@@ -38,8 +38,8 @@ const SETTINGS = {
     customSearchUrl: '',
     homepage: 'nevix://newtab',
     startup: 'newtab', // newtab | restore | homepage
-    theme: 'system',   // system | dark | light
-    accent: '#8b7cff',
+    theme: 'dark',     // dark | light | system
+    accent: '',            // '' = the Nevix palette; a #rrggbb value overrides --color-primary
     verticalTabs: false,
     sidebarCollapsed: false,
     bookmarksBar: true,

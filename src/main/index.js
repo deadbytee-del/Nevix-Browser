@@ -175,6 +175,9 @@ class NevixApp {
       const u = new URL(req.url);
       let file;
       if (u.hostname === 'ui') file = path.join(ROOT, 'ui', u.pathname.replace(/^\/+/, '') || 'index.html');
+      else if (u.hostname === 'res' && u.pathname === '/tokens.css') {
+        return new Response(require('./theme').css(this.settings.get('general.accent')), { headers: { 'content-type': MIME['.css'], 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
+      }
       else if (u.hostname === 'res') file = path.join(ROOT, 'pages', 'res', u.pathname.replace(/^\/+/, ''));
       else if (PAGES.has(u.hostname)) file = path.join(ROOT, 'pages', u.hostname + '.html');
       else return new Response('Not found', { status: 404 });
@@ -425,7 +428,7 @@ app.on('login', (e, wc, req, auth, cb) => {
   const parent = BrowserWindow.fromWebContents(wc) || (nx.lastWindow && nx.lastWindow.win);
   const win = new BrowserWindow({
     width: 420, height: 300, parent, modal: !!parent, resizable: false, minimizable: false, maximizable: false,
-    show: false, title: 'Sign in', autoHideMenuBar: true, backgroundColor: '#15151c',
+    show: false, title: 'Sign in', autoHideMenuBar: true, backgroundColor: require('./theme').DARK['color-background'],
     webPreferences: { sandbox: true, contextIsolation: true, preload: path.join(__dirname, '..', 'preload', 'page.js'), partition: 'nevix-auth' },
   });
   win.removeMenu();

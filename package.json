@@ -26,8 +26,8 @@
     "copyright": "Copyright \u00a9 2026 deadbytee-del",
     "files": [
       "src/**/*",
-      "assets/icon.png",
-      "assets/icon.svg",
+      "assets/app-icon.png",
+      "assets/app-icon.svg",
       "package.json",
       "!**/*.map"
     ],
@@ -55,7 +55,7 @@
         "dmg",
         "zip"
       ],
-      "icon": "assets/icon.png",
+      "icon": "assets/app-icon.png",
       "extendInfo": {
         "CFBundleURLTypes": [
           {
@@ -73,7 +73,7 @@
         "nsis",
         "portable"
       ],
-      "icon": "assets/icon.png"
+      "icon": "assets/app-icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -86,7 +86,7 @@
         "deb"
       ],
       "category": "Network;WebBrowser",
-      "icon": "assets/icon.png",
+      "icon": "assets/app-icon.png",
       "maintainer": "deadbytee-del",
       "mimeTypes": [
         "x-scheme-handler/http",

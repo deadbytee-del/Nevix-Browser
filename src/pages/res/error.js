@@ -18,7 +18,7 @@
   if (!danger) acts[1].className = 'btn';
   const adv = [];
   if (danger) adv.push(el('button', { class: 'btn danger sm', onclick: () => call('error:proceed', { kind: type, url, http }) }, type === 'https' ? 'Continue to HTTP site (unsafe)' : 'Proceed to ' + host + ' (unsafe)'));
-  root.append(el('div', { style: `color:var(--${danger ? 'danger' : 'dim'});margin-bottom:14px;font-size:44px` }, icon(danger ? 'warn' : 'globe')),
+  root.append(el('div', { style: `color:var(--color-${danger ? 'danger-text' : 'text-secondary'});margin-bottom:14px;font-size:44px` }, icon(danger ? 'warn' : 'globe')),
     el('h1', {}, title), el('p', { class: 'dim', style: 'margin:10px 0 24px;font-size:15px' }, body),
     el('div', { style: 'display:flex;gap:10px;flex-wrap:wrap' }, acts), adv.length ? el('div', { style: 'margin-top:28px' }, adv) : null,
     el('p', { class: 'dim', style: 'margin-top:34px;font-size:12px' }, desc + (q.get('code') ? ' (' + q.get('code') + ')' : '')));

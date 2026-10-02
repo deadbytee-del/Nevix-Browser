@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/icon.svg" width="96" alt="Nevix"></p>
-
 # Nevix
 
 **A fast, private, bloat-free browser.** Real Chromium underneath, a hand-written interface and privacy engine on top — no accounts, no sync servers, no telemetry, no sponsored tiles, no frameworks.

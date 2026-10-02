@@ -68,8 +68,8 @@
   const favNode = (url, favicon, title, loading) => {
     const f = el('span', { class: 't-fav' + (loading ? ' spin' : '') });
     if (favicon) f.append(el('img', { src: favicon, draggable: 'false' }));
-    else if (url && /^https?:/.test(url)) { const h = hostOf(url); f.style.background = `hsl(${hue(h)} 45% 42%)`; f.textContent = (h[0] || '?').toUpperCase(); }
-    else if (/^nevix:/.test(url) || !url) { f.append(icon('shield', 15)); f.style.color = 'var(--accent)'; }
+    else if (url && /^https?:/.test(url)) { const h = hostOf(url); f.style.background = 'var(--color-surface-tertiary)'; f.style.color = 'var(--color-primary-text)'; f.textContent = (h[0] || '?').toUpperCase(); }
+    else if (/^nevix:/.test(url) || !url) { f.textContent = 'N'; f.style.color = 'var(--color-primary-text)'; f.style.fontFamily = 'var(--font-mono)'; }
     else f.append(icon('globe', 15));
     return f;
   };
@@ -78,7 +78,7 @@
   function render(state) {
     S = state;
     document.body.classList.toggle('private', state.private);
-    document.documentElement.style.setProperty('--accent', state.private ? '#c18cff' : state.settings.accent);
+    document.documentElement.style.setProperty('--color-primary', state.settings.accent || '');
     const v = state.settings.verticalTabs;
     document.body.classList.toggle('vertical', v);
     document.body.classList.toggle('sb-collapsed', v && state.settings.sidebarCollapsed);

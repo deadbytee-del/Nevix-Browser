@@ -80,7 +80,7 @@
 
       sect('appearance', 'Appearance', 'Make it yours.',
         group('', select('general.theme', 'Theme', '', [['system', 'Match system'], ['dark', 'Dark'], ['light', 'Light']]),
-          row('Accent colour', '', (() => { const c = el('input', { type: 'color', value: g.accent }); c.onchange = () => { set('general.accent', c.value); document.documentElement.style.setProperty('--accent', c.value); }; return c; })()))),
+          row('Accent colour', '', (() => { const c = el('input', { type: 'color', value: g.accent }); c.onchange = () => { set('general.accent', c.value); document.documentElement.style.setProperty('--color-primary', c.value); }; return c; })()))),
 
       sect('search', 'Search', 'Nevix sends nothing to a search engine until you press Enter. Suggestions are computed locally.',
         group('', select('general.searchEngine', 'Search engine', '', Object.entries(cfg.engines).map(([k, v]) => [k, v.name])),

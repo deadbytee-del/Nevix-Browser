@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#1F171D"/>
+  <rect x="12" y="12" width="232" height="232" fill="none" stroke="#9D64A3" stroke-width="6"/>
+  <text x="128" y="176" font-family="Consolas, 'DejaVu Sans Mono', monospace" font-size="150" font-weight="700" text-anchor="middle" fill="#9D64A3">N</text>
+</svg>
