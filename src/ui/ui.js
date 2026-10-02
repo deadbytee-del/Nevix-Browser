@@ -5,7 +5,6 @@
     const e = document.createElement(tag);
     for (const [k, v] of Object.entries(props || {})) {
       if (k === 'class') e.className = v;
-      else if (k === 'html') e.innerHTML = v;
       else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
       else if (v !== undefined && v !== false && v !== null) e.setAttribute(k, v === true ? '' : v);
     }
@@ -13,7 +12,7 @@
     return e;
   };
 
-  // ---- icons (24x24 stroke paths) ------------------------------------------------------------
+  // ---- icons (24x24 stroke paths) ------------------------------------------------------------------
   const P = {
     back: 'M19 12H5M12 19l-7-7 7-7', forward: 'M5 12h14M12 5l7 7-7 7', reload: 'M20 12a8 8 0 1 1-2.5-5.8L20 8.5M20 3.5v5h-5',
     stop: 'M6 6l12 12M18 6L6 18', x: 'M18 6L6 18M6 6l12 12', plus: 'M12 5v14M5 12h14',
@@ -23,17 +22,17 @@
     download: 'M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14', menu: 'M4 7h16M4 12h16M4 17h16',
     search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4', globe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18',
     vol: 'M4 9.5v5h3.5L12 18V6L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11', mute: 'M4 9.5v5h3.5L12 18V6L7.5 9.5zM16 9.5l5 5M21 9.5l-5 5',
-    pin: 'M9 4h6l-1 6 3 3v2H7v-2l3-3zM12 15v6', sidebar: 'M4 5h16v14H4zM9.5 5v14', mask: 'M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM9.5 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M4 4l16 16',
-    home: 'M4 11l8-7 8 7M6 10v10h12V10', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2.6l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2.2 1.3L10 21h4l.4-2.4a7 7 0 0 0 2.2-1.3l2.3.9 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z',
+    sidebar: 'M4 5h16v14H4zM9.5 5v14', mask: 'M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM9.5 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M4 4l16 16',
+    clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2.6l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2.2 1.3L10 21h4l.4-2.4a7 7 0 0 0 2.2-1.3l2.3.9 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z',
     cmd: 'M9 9h6v6H9zM9 9V6.5A2.5 2.5 0 1 0 6.5 9H9zm6 0h2.5A2.5 2.5 0 1 0 15 6.5V9zm0 6v2.5a2.5 2.5 0 1 0 2.5-2.5H15zm-6 0H6.5A2.5 2.5 0 1 0 9 17.5V15z',
     book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11', find: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4M9 11h4',
-    print: 'M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z', zoom: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4M8.5 11h5M11 8.5v5',
-    camera: 'M4 8h3l1.5-2h7L17 8h3v11H4zM12 16.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', code: 'M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14',
+    print: 'M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z', camera: 'M4 8h3l1.5-2h7L17 8h3v11H4zM12 16.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', code: 'M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14',
     reader: 'M5 4h14v16H5zM8.5 9h7M8.5 12.5h7M8.5 16h4', trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13', link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1',
-    box: 'M3 7.5L12 3l9 4.5v9L12 21l-9-4.5zM3 7.5l9 4.5 9-4.5M12 12v9', moon: 'M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z', power: 'M12 3v8M6.5 6.5a8 8 0 1 0 11 0',
-    chevron: 'M6 9l6 6 6-6', check: 'M5 12.5l4.5 4.5L19 7.5', window: 'M4 5h16v14H4zM4 9h16', ghost: 'M5 20V11a7 7 0 0 1 14 0v9l-3-2-2 2-2-2-2 2-2-2zM9.5 11h.01M14.5 11h.01',
-    sleep: 'M4 5h5L4 11h5M13 12h6l-6 7h6M14 4h4l-4 4h4', warn: 'M12 4l9 16H3zM12 10v4M12 17h.01', tag: 'M4 12V5h7l9 9-7 7z',
-    open: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', dots: 'M5 12h.01M12 12h.01M19 12h.01',
+    box: 'M3 7.5L12 3l9 4.5v9L12 21l-9-4.5zM3 7.5l9 4.5 9-4.5M12 12v9', power: 'M12 3v8M6.5 6.5a8 8 0 1 0 11 0', window: 'M4 5h16v14H4zM4 9h16',
+    sleep: 'M4 5h5L4 11h5M13 12h6l-6 7h6M14 4h4l-4 4h4', warn: 'M12 4l9 16H3zM12 10v4M12 17h.01', tag: 'M4 12V5h7l9 9-7 7z', open: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+    gauge: 'M4 18a8 8 0 1 1 16 0M12 18l4-5', puzzle: 'M10 4h4v3a2 2 0 1 0 0 4v3h-4v-3a2 2 0 1 1 0-4z', flag: 'M5 21V4M5 4h11l-2 4 2 4H5', layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
+    snow: 'M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9', term: 'M4 5h16v14H4zM7 9l3 3-3 3M12 15h5', calc: 'M5 3h14v18H5zM8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2', swap: 'M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4',
+    group: 'M3 9a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', check: 'M5 12.5l4.5 4.5L19 7.5',
   };
   const icon = (n, size) => {
     const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -51,7 +50,6 @@
   for (const b of document.querySelectorAll('#side-foot [data-page]')) b.append(icon({ downloads: 'download', history: 'clock', settings: 'gear' }[b.dataset.page]));
 
   const IS_MAC = nx.platform === 'darwin';
-  const MOD = IS_MAC ? '⌘' : 'Ctrl+';
   document.documentElement.classList.toggle('mac', IS_MAC);
   document.body.classList.toggle('mac', IS_MAC);
   if (location.hash === '#private') document.body.classList.add('private');
@@ -61,11 +59,12 @@
   let findOpen = false;
   let bookmarks = [];
   let downloads = [];
+  let commands = null;          // palette command list (fetched from main's registry)
   let toastTimer = 0;
+  const GROUP_VAR = { primary: 'var(--color-primary)', warning: 'var(--color-warning)', success: 'var(--color-success)', danger: 'var(--color-danger-hover)', neutral: 'var(--color-text-secondary)' };
 
-  const hue = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; };
   const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
-  const favNode = (url, favicon, title, loading) => {
+  const favNode = (url, favicon, loading) => {
     const f = el('span', { class: 't-fav' + (loading ? ' spin' : '') });
     if (favicon) f.append(el('img', { src: favicon, draggable: 'false' }));
     else if (url && /^https?:/.test(url)) { const h = hostOf(url); f.style.background = 'var(--color-surface-tertiary)'; f.style.color = 'var(--color-primary-text)'; f.textContent = (h[0] || '?').toUpperCase(); }
@@ -73,8 +72,10 @@
     else f.append(icon('globe', 15));
     return f;
   };
+  const fmtBytes = (n) => n > 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n > 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n > 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B';
+  const fmtEta = (s) => (s > 3600 ? Math.floor(s / 3600) + 'h ' + Math.round((s % 3600) / 60) + 'm' : s > 60 ? Math.round(s / 60) + ' min' : s + ' s');
 
-  // ---- state rendering -----------------------------------------------------------------------
+  // ---- state rendering -----------------------------------------------------------------------------
   function render(state) {
     S = state;
     document.body.classList.toggle('private', state.private);
@@ -83,35 +84,69 @@
     document.body.classList.toggle('vertical', v);
     document.body.classList.toggle('sb-collapsed', v && state.settings.sidebarCollapsed);
     document.body.classList.toggle('bm-on', state.settings.bookmarksBar);
-    document.documentElement.style.setProperty('--sw', (state.settings.sidebarCollapsed ? 58 : 248) + 'px');
+    document.documentElement.style.setProperty('--sw', (state.settings.sidebarCollapsed ? 58 : 240) + 'px');
     renderTabs();
     renderToolbar();
     renderBookmarks();
   }
 
   const tabEls = new Map();
+  const chipEls = new Map();
   function renderTabs() {
     const v = S.settings.verticalTabs;
     const hostMain = v ? $('#side-tabs') : $('#tabs');
     const hostPins = v ? $('#side-pins') : null;
     const ids = new Set(S.tabs.map((t) => t.id));
     for (const [id, e] of tabEls) if (!ids.has(id)) { e.remove(); tabEls.delete(id); }
-    let pinIdx = 0, mainIdx = 0;
+    const gids = new Set(S.groups.map((g) => g.id));
+    for (const [id, e] of chipEls) if (!gids.has(id)) { e.remove(); chipEls.delete(id); }
+    const order = [];     // desired child order of hostMain
+    const pins = [];
+    let lastGroup = 0;
     for (const t of S.tabs) {
       let e = tabEls.get(t.id);
       if (!e) { e = makeTab(t); tabEls.set(t.id, e); }
       updateTab(e, t);
-      const target = v && t.pinned ? hostPins : hostMain;
-      const idx = v && t.pinned ? pinIdx++ : mainIdx++;
-      if (e.parentNode !== target || target.children[idx] !== e) target.insertBefore(e, target.children[idx] || null);
+      if (v && t.pinned) { pins.push(e); continue; }
+      if (t.group && t.group !== lastGroup) {
+        const g = S.groups.find((x) => x.id === t.group);
+        if (g) {
+          let chip = chipEls.get(g.id);
+          if (!chip) { chip = makeChip(g); chipEls.set(g.id, chip); }
+          updateChip(chip, g);
+          order.push(chip);
+        }
+      }
+      lastGroup = t.group;
+      order.push(e);
     }
-    if (v && !S.tabs.some((t) => t.pinned)) hostPins.replaceChildren();
+    order.forEach((node, i) => { if (hostMain.children[i] !== node) hostMain.insertBefore(node, hostMain.children[i] || null); });
+    if (v && hostPins) pins.forEach((node, i) => { if (hostPins.children[i] !== node) hostPins.insertBefore(node, hostPins.children[i] || null); });
+  }
+
+  function makeChip(g) {
+    const c = el('button', { class: 'group-chip' });
+    c.addEventListener('click', () => nx.cmd('group.toggle', g.id));
+    c.addEventListener('contextmenu', (ev) => { ev.preventDefault(); nx.cmd('group.context', g.id); });
+    return c;
+  }
+  function updateChip(c, g) {
+    c.style.setProperty('--gcolor', GROUP_VAR[g.color] || GROUP_VAR.primary);
+    c.classList.toggle('collapsed', !!g.collapsed);
+    const n = S.tabs.filter((t) => t.group === g.id).length;
+    c.textContent = (g.name || 'Group') + (g.collapsed ? ` · ${n}` : '');
+    c.title = (g.collapsed ? 'Expand' : 'Collapse') + ' group';
   }
 
   function makeTab(t) {
     const e = el('div', { class: 'tab', draggable: 'true', 'data-id': t.id });
     e.addEventListener('mousedown', (ev) => {
-      if (ev.button === 0) nx.cmd('tab.activate', t.id);
+      if (ev.button === 0) {
+        if (ev.ctrlKey || ev.metaKey) { nx.cmd('tab.select', { id: t.id, mode: 'toggle' }); return; }
+        if (ev.shiftKey) { nx.cmd('tab.select', { id: t.id, mode: 'range' }); return; }
+        nx.cmd('tab.select', { id: t.id, mode: 'single' });
+        nx.cmd('tab.activate', t.id);
+      }
       if (ev.button === 1) { ev.preventDefault(); nx.cmd('tab.close', t.id); }
     });
     e.addEventListener('contextmenu', (ev) => { ev.preventDefault(); nx.cmd('tab.context', t.id); });
@@ -139,16 +174,23 @@
   }
   const clearDrop = () => document.querySelectorAll('.drop-before,.drop-after').forEach((n) => n.classList.remove('drop-before', 'drop-after'));
 
+  const STAGE_NOTE = { frozen: ' (frozen)', suspended: ' (suspended)', discarded: ' (discarded)' };
   function updateTab(e, t) {
     e.classList.toggle('active', t.id === S.activeId);
+    e.classList.toggle('selected', !!t.selected);
     e.classList.toggle('pinned', t.pinned);
     e.classList.toggle('sleeping', t.sleeping);
+    e.classList.toggle('frozen', t.stage === 'frozen');
     e.classList.toggle('iso', t.iso);
-    e.title = (t.iso ? '[Isolated] ' : '') + t.title + (t.sleeping ? ' (sleeping)' : '');
+    e.classList.toggle('temp', t.temp);
+    e.hidden = !!t.hidden;
+    if (t.group) { const g = S.groups.find((x) => x.id === t.group); e.dataset.group = t.group; if (g) e.style.setProperty('--gcolor', GROUP_VAR[g.color] || GROUP_VAR.primary); }
+    else { delete e.dataset.group; e.style.removeProperty('--gcolor'); }
+    e.title = (t.iso ? '[Isolated] ' : '') + (t.temp ? '[Temporary] ' : '') + t.title + (STAGE_NOTE[t.stage] || '');
     const sig = [t.favicon.length, t.url.slice(0, 40), t.loading, t.audible, t.muted, t.title, t.pinned].join('|');
     if (e._sig === sig) return;
     e._sig = sig;
-    const kids = [favNode(t.url, t.favicon, t.title, t.loading)];
+    const kids = [favNode(t.url, t.favicon, t.loading)];
     kids.push(el('span', { class: 't-title' }, t.title));
     if (t.audible || t.muted) kids.push(el('span', { class: 't-audio', title: t.muted ? 'Unmute' : 'Mute', onmousedown: (ev) => { ev.stopPropagation(); nx.cmd('tab.mute', t.id); } }, icon(t.muted ? 'mute' : 'vol')));
     kids.push(el('button', { class: 't-close', title: 'Close tab', onmousedown: (ev) => { ev.stopPropagation(); nx.cmd('tab.close', t.id); } }, icon('x')));
@@ -187,7 +229,6 @@
     if (a && a.url) {
       if (a.secure) { si.classList.add('secure'); ic = 'lock'; }
       else if (/^https?:/.test(a.url)) { si.classList.add('insecure'); ic = 'unlock'; }
-      else ic = 'shield';
     }
     si.replaceChildren(icon(a && a.shieldsOff ? 'shieldoff' : ic));
     $('#star').classList.toggle('on', !!(a && a.bookmarked));
@@ -201,7 +242,7 @@
     sc.hidden = !total || (a && a.shieldsOff);
     sc.textContent = total > 99 ? '99+' : total;
     $('#shield').classList.toggle('off', !!(a && a.shieldsOff));
-    if (S.private && !$('.private-badge')) $('#toolbar .grp:last-child').prepend(el('div', { class: 'private-badge' }, icon('mask', 15), 'Private'));
+    if (S.private && !$('.private-badge')) $('#toolbar .grp:last-child').prepend(el('div', { class: 'private-badge' }, icon('mask', 14), 'private'));
     if (panel && panel.kind === 'shield') showPanel('shield', true);
   }
 
@@ -209,10 +250,9 @@
     const bar = $('#bmbar');
     if (!S.settings.bookmarksBar) return;
     bar.replaceChildren();
-    if (!bookmarks.length) { bar.append(el('div', { class: 'bm-empty' }, 'Bookmarks you add appear here — press ' + MOD + 'D on any page.')); return; }
+    if (!bookmarks.length) { bar.append(el('div', { class: 'bm-empty' }, 'Bookmarks you add appear here — press ' + (IS_MAC ? '⌘' : 'Ctrl+') + 'D on any page.')); return; }
     for (const b of bookmarks) {
-      const item = el('button', { class: 'bm', title: b.title + '\n' + b.url },
-        favNode(b.url, '', b.title), el('span', {}, b.title));
+      const item = el('button', { class: 'bm', title: b.title + '\n' + b.url }, favNode(b.url, ''), el('span', {}, b.title));
       item.addEventListener('click', () => nx.cmd('nav', { text: b.url }));
       item.addEventListener('auxclick', (ev) => { if (ev.button === 1) nx.cmd('nav', { text: b.url, newTab: true }); });
       item.addEventListener('contextmenu', (ev) => { ev.preventDefault(); showPanel('bmctx', false, { b, x: ev.clientX, y: ev.clientY }); });
@@ -220,18 +260,19 @@
     }
   }
 
-  // ---- overlay panels ------------------------------------------------------------------------
+  // ---- overlay panels ------------------------------------------------------------------------------
   const overlay = $('#overlay'), panelEl = $('#panel');
   function openOverlay(dim) {
     if (overlay.hidden) nx.cmd('overlay', true);
     overlay.hidden = false;
     overlay.classList.toggle('dim', !!dim);
   }
-  function closePanel(refocus = true) {
+  function closePanel() {
     if (!panel && overlay.hidden) return;
     panel = null;
     overlay.hidden = true;
     panelEl.replaceChildren();
+    panelEl.removeAttribute('style');
     nx.cmd('overlay', false);
     if (document.activeElement === urlInput) urlInput.blur();
   }
@@ -242,31 +283,35 @@
     panelEl.style.top = y + 'px';
   };
 
-  const menuItem = (ic, label, kb, fn, sel) => el('div', { class: 'menu-item' + (sel ? ' sel' : ''), onclick: () => { closePanel(); fn(); } },
-    ic ? icon(ic) : el('span', { style: 'width:18px' }), el('span', {}, label), kb ? el('span', { class: 'kb' }, kb) : null);
+  const menuItem = (ic, label, kb, fn, cls) => el('div', { class: 'menu-item' + (cls ? ' ' + cls : ''), onclick: () => { closePanel(); fn(); } },
+    ic ? icon(ic) : el('span', { style: 'width:17px' }), el('span', {}, label), kb ? el('span', { class: 'kb' }, kb) : null);
   const exec = (name, arg) => () => nx.cmd('exec', { name, arg });
+  const row = (ic, label, n, cls) => el('div', { class: 'row' + (cls ? ' ' + cls : '') }, el('span', { class: 'ico' }, icon(ic)), el('span', {}, label), el('span', { class: 'num' }, String(n || 0)));
+  const k = (s) => (IS_MAC ? '⌘' : 'Ctrl+') + s;
 
   function showPanel(kind, rerender, data) {
     if (!S) return;
     if (!rerender) { panel = { kind, data }; openOverlay(kind === 'palette'); }
     else if (!panel || panel.kind !== kind) return;
     panelEl.replaceChildren();
-    panelEl.style.width = '';
+    panelEl.removeAttribute('style');
     const a = S.active;
     if (kind === 'menu') {
       const mb = $('#menu').getBoundingClientRect();
       place(Math.max(8, window.innerWidth - mb.right), mb.bottom + 6, true);
-      panelEl.style.width = '290px';
-      const k = (s) => MOD + s;
+      panelEl.style.width = '300px';
+      const f = S.features;
       panelEl.append(el('div', { class: 'menu-pad' },
         menuItem('plus', 'New tab', k('T'), exec('newTab')),
         menuItem('window', 'New window', k('N'), exec('newWindow')),
         menuItem('mask', 'New private window', k('⇧N'), exec('privateWindow')),
         menuItem('box', 'New isolated tab', k('⌥N'), exec('isolatedTab')),
         el('div', { class: 'menu-sep' }),
-        menuItem('clock', 'History', k(IS_MAC ? 'Y' : 'H'), exec('openPage', 'history')),
-        menuItem('book', 'Bookmarks', k('⇧O'), exec('openPage', 'bookmarks')),
-        menuItem('download', 'Downloads', k('J'), exec('openPage', 'downloads')),
+        menuItem('clock', 'History', k(IS_MAC ? 'Y' : 'H'), exec('openHistory')),
+        menuItem('book', 'Bookmarks', k('⇧O'), exec('openBookmarks')),
+        menuItem('download', 'Downloads', k('J'), exec('openDownloads')),
+        f.workspaces ? menuItem('layers', 'Workspaces', '', exec('openWorkspaces')) : null,
+        menuItem('puzzle', 'Extensions', '', exec('openExtensions')),
         el('div', { class: 'menu-sep' }),
         menuItem('find', 'Find in page', k('F'), exec('find')),
         menuItem('reader', 'Reader mode', k('⌥R'), exec('reader')),
@@ -274,16 +319,18 @@
         menuItem('camera', 'Take screenshot', k('⇧S'), exec('capture')),
         menuItem('code', 'Developer tools', 'F12', exec('devtools')),
         el('div', { class: 'menu-sep' }),
-        menuItem('sidebar', S.settings.verticalTabs ? 'Use horizontal tabs' : 'Use vertical tabs', k('⇧E'), exec('toggleVertical')),
-        menuItem('cmd', 'Command palette', k('K'), exec('palette')),
-        menuItem('gear', 'Settings', k(','), exec('openPage', 'settings')),
+        menuItem('shield', 'Privacy dashboard', '', exec('openPrivacy')),
+        menuItem('gauge', 'Performance center', '', exec('openPerformance')),
+        f.vertical ? menuItem('sidebar', S.settings.verticalTabs ? 'Use horizontal tabs' : 'Use vertical tabs', k('⇧E'), exec('toggleVertical')) : null,
+        f.palette ? menuItem('cmd', 'Command palette', k('⇧P'), exec('palette')) : null,
+        menuItem('gear', 'Settings', k(','), exec('openSettings')),
         el('div', { class: 'menu-sep' }),
         menuItem('power', 'Quit Nevix', '', () => nx.cmd('quit')),
       ));
     } else if (kind === 'shield') {
       const anchor = $('#siteinfo').getBoundingClientRect();
       place(Math.max(8, anchor.left - 4), anchor.bottom + 8);
-      panelEl.style.width = '340px';
+      panelEl.style.width = '350px';
       if (!a) return;
       const internal = a.internal || !/^https?:/.test(a.rawUrl);
       const c = a.counters;
@@ -295,28 +342,30 @@
           el('div', { class: 'row' }, el('span', {}, 'Shields for this site'), el('div', { class: 'switch' + (a.shieldsOff ? '' : ' on'), onclick: () => nx.cmd('shield.site', { off: !a.shieldsOff }) })),
           el('div', { class: 'menu-sep' }),
           row('globe', 'Ads blocked', c.ads), row('search', 'Trackers blocked', c.trackers),
-          row('tag', 'Third-party cookies blocked', c.cookies), row('lock', 'Upgraded to HTTPS', c.upgrades),
-        );
+          row('tag', 'Third-party cookies blocked', c.cookies), row('lock', 'Upgraded to HTTPS', c.upgrades));
+        if (a.stage && a.stage !== 'active') panelEl.append(el('div', { class: 'row dim' }, 'Tab state: ' + a.stage));
         if (a.perms.length) {
           panelEl.append(el('div', { class: 'menu-sep' }), el('div', { class: 'row dim' }, 'Site permissions'),
-            el('div', { class: 'row', style: 'flex-wrap:wrap;padding-top:0' }, a.perms.map((p) => el('span', { class: 'chip' }, p.perm + ': ' + p.value, el('button', { title: 'Reset', onclick: () => nx.cmd('perm.revoke', p.perm) }, '×')))));
+            el('div', { class: 'row', style: 'flex-wrap:wrap;padding-top:0' }, a.perms.map((p) => el('span', { class: 'chip' }, p.label + ': ' + p.stored, el('button', { title: 'Reset', onclick: () => nx.cmd('perm.revoke', p.id) }, '×')))));
         }
         panelEl.append(el('div', { class: 'menu-sep' }), el('div', { class: 'menu-pad' },
+          a.shieldsOff ? null : menuItem('clock', 'Allow trackers on this site for 30 minutes', '', () => nx.cmd('shield.temp', { minutes: 30 })),
+          menuItem('shield', 'Privacy details for this site', '', exec('openPrivacy')),
           menuItem('reader', 'Reader mode', '', exec('reader')),
-          menuItem('link', 'Copy clean link', k2('⇧C'), exec('copyCleanUrl')),
-          menuItem('trash', 'Clear cookies & data for this site', '', exec('clearSiteData'))));
+          menuItem('link', 'Copy clean link', k('⇧C'), exec('copyCleanUrl')),
+          menuItem('trash', 'Reset permissions, cookies & data for this site', '', exec('clearSiteData'), 'danger')));
       } else {
-        panelEl.append(el('div', { class: 'menu-pad' }, menuItem('gear', 'Privacy settings', '', exec('openPage', 'settings#privacy'))));
+        panelEl.append(el('div', { class: 'menu-pad' }, menuItem('gear', 'Privacy settings', '', exec('openSettings'))));
       }
     } else if (kind === 'downloads') {
       const anchor = $('#dl').getBoundingClientRect();
       place(Math.max(8, window.innerWidth - anchor.right - 8), anchor.bottom + 8, true);
-      panelEl.style.width = '360px';
+      panelEl.style.width = '380px';
       panelEl.append(el('div', { class: 'panel-head' }, el('h3', {}, icon('download'), 'Downloads')));
       const list = downloads.slice(0, 6);
       if (!list.length) panelEl.append(el('div', { class: 'empty' }, 'No downloads yet'));
       for (const d of list) panelEl.append(dlRow(d));
-      panelEl.append(el('div', { class: 'menu-sep' }), el('div', { class: 'menu-pad' }, menuItem('open', 'Show all downloads', k2('J'), exec('openPage', 'downloads'))));
+      panelEl.append(el('div', { class: 'menu-sep' }), el('div', { class: 'menu-pad' }, menuItem('open', 'Open download manager', k('J'), exec('openDownloads'))));
     } else if (kind === 'bmctx') {
       const { b, x, y } = data;
       place(Math.min(x, window.innerWidth - 230), y + 4);
@@ -324,96 +373,78 @@
       panelEl.append(el('div', { class: 'menu-pad' },
         menuItem('open', 'Open', '', () => nx.cmd('nav', { text: b.url })),
         menuItem('plus', 'Open in new tab', '', () => nx.cmd('nav', { text: b.url, newTab: true })),
-        menuItem('trash', 'Remove bookmark', '', () => nx.cmd('bookmark.remove', b.id))));
+        menuItem('trash', 'Remove bookmark', '', () => nx.cmd('bookmark.remove', b.id), 'danger')));
     } else if (kind === 'palette') { palette(); }
   }
-  const k2 = (s) => MOD + s;
-  const row = (ic, label, n) => el('div', { class: 'row' }, el('span', { class: 'ico' }, icon(ic)), el('span', {}, label), el('span', { class: 'num' }, String(n || 0)));
-  const fmtBytes = (n) => n > 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n > 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n > 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B';
+
   function dlRow(d) {
     const pct = d.total > 0 ? Math.min(100, (d.received / d.total) * 100) : 0;
-    const status = d.state === 'progressing' ? `${fmtBytes(d.received)}${d.total > 0 ? ' / ' + fmtBytes(d.total) : ''}` : d.state === 'completed' ? fmtBytes(d.total || d.received) : d.state;
+    const live = d.state === 'progressing';
+    const status = live ? `${fmtBytes(d.received)}${d.total > 0 ? ' / ' + fmtBytes(d.total) : ''}${d.speed ? ' · ' + fmtBytes(d.speed) + '/s' : ''}${d.eta ? ' · ' + fmtEta(d.eta) : ''}` : d.state === 'completed' ? fmtBytes(d.total || d.received) : d.state;
+    const btn = (label, action, cls = '') => el('button', { class: 'btn ' + cls, onclick: () => nx.cmd('download.action', { id: d.id, action }) }, label);
     return el('div', { class: 'dl-item' },
-      el('div', { class: 'top' }, el('span', { class: 'name', title: d.name }, d.name), el('span', { class: 'dim' }, status)),
-      d.state === 'progressing' || d.state === 'paused' ? el('div', { class: 'bar' }, el('i', { style: `width:${pct}%` })) : null,
+      el('div', { class: 'top' }, el('span', { class: 'name', title: d.name }, d.name), d.danger ? el('span', { class: 'chip', style: 'color:var(--color-danger-text)' }, d.danger.level) : null),
+      el('div', { class: 'meta' }, d.domain + ' · ' + status),
+      live || d.state === 'paused' || d.state === 'queued' ? el('div', { class: 'bar' }, el('i', { style: `width:${pct}%` })) : null,
       el('div', { class: 'top' },
-        d.state === 'completed' ? el('button', { class: 'btn', onclick: () => nx.cmd('download.action', { id: d.id, action: 'open' }) }, 'Open') : null,
-        d.state === 'completed' ? el('button', { class: 'btn', onclick: () => nx.cmd('download.action', { id: d.id, action: 'show' }) }, 'Show in folder') : null,
-        d.state === 'progressing' ? el('button', { class: 'btn', onclick: () => nx.cmd('download.action', { id: d.id, action: 'pause' }) }, 'Pause') : null,
-        d.state === 'paused' ? el('button', { class: 'btn', onclick: () => nx.cmd('download.action', { id: d.id, action: 'resume' }) }, 'Resume') : null,
-        d.state === 'progressing' || d.state === 'paused' ? el('button', { class: 'btn', onclick: () => nx.cmd('download.action', { id: d.id, action: 'cancel' }) }, 'Cancel') : null));
+        d.state === 'completed' ? [btn('Open', 'open'), btn('Show in folder', 'show')] : null,
+        live ? [btn('Pause', 'pause'), btn('Cancel', 'cancel')] : null,
+        d.state === 'paused' || d.state === 'queued' ? [btn('Resume', 'resume'), btn('Cancel', 'cancel')] : null,
+        d.state === 'interrupted' || d.state === 'cancelled' ? btn('Retry', 'retry') : null));
   }
 
-  // ---- command palette -----------------------------------------------------------------------
-  const COMMANDS = () => [
-    ['plus', 'New tab', MOD + 'T', exec('newTab')],
-    ['mask', 'New private window', MOD + '⇧N', exec('privateWindow')],
-    ['box', 'New isolated tab (separate cookies & storage)', MOD + '⌥N', exec('isolatedTab')],
-    ['window', 'New window', MOD + 'N', exec('newWindow')],
-    ['x', 'Close tab', MOD + 'W', exec('closeTab')],
-    ['reload', 'Reopen closed tab', MOD + '⇧T', exec('reopenTab')],
-    ['reload', 'Reload page', MOD + 'R', exec('reload')],
-    ['reader', 'Toggle reader mode', MOD + '⌥R', exec('reader')],
-    ['find', 'Find in page', MOD + 'F', exec('find')],
-    ['star', 'Bookmark this page', MOD + 'D', exec('bookmark')],
-    ['star', 'Bookmark all open tabs', MOD + '⇧D', exec('bookmarkAll')],
-    ['book', 'Toggle bookmarks bar', MOD + '⇧B', exec('toggleBookmarksBar')],
-    ['sidebar', 'Toggle vertical tabs', MOD + '⇧E', exec('toggleVertical')],
-    ['sidebar', 'Collapse / expand sidebar', '', exec('toggleSidebar')],
-    ['shield', 'Toggle shields for this site', '', () => nx.cmd('shield.site', { off: !(S.active && S.active.shieldsOff) })],
-    ['trash', 'Clear cookies & data for this site', '', exec('clearSiteData')],
-    ['trash', 'Clear browsing data…', MOD + '⇧⌫', exec('openPage', 'settings#data')],
-    ['link', 'Copy clean link (no tracking parameters)', MOD + '⇧C', exec('copyCleanUrl')],
-    ['sleep', 'Put all other tabs to sleep', MOD + '⌥S', exec('sleepOthers')],
-    ['mute', 'Mute / unmute tab', MOD + '⇧M', exec('muteTab')],
-    ['zoom', 'Zoom in', MOD + '+', exec('zoomIn')], ['zoom', 'Zoom out', MOD + '-', exec('zoomOut')], ['zoom', 'Reset zoom', MOD + '0', exec('zoomReset')],
-    ['print', 'Print…', MOD + 'P', exec('print')], ['print', 'Save page as PDF…', '', exec('savePdf')],
-    ['camera', 'Take screenshot of page', MOD + '⇧S', exec('capture')],
-    ['code', 'View page source', MOD + 'U', exec('viewSource')], ['code', 'Developer tools', 'F12', exec('devtools')],
-    ['clock', 'History', IS_MAC ? MOD + 'Y' : MOD + 'H', exec('openPage', 'history')],
-    ['book', 'Bookmarks', MOD + '⇧O', exec('openPage', 'bookmarks')],
-    ['download', 'Downloads', MOD + 'J', exec('openPage', 'downloads')],
-    ['gear', 'Settings', MOD + ',', exec('openPage', 'settings')],
-    ['shield', 'Privacy & shields settings', '', exec('openPage', 'settings#privacy')],
-    ['window', 'Toggle fullscreen', 'F11', exec('fullscreen')],
-    ['power', 'Quit Nevix', '', () => nx.cmd('quit')],
-  ];
-  function palette() {
+  // ---- command palette (commands come from the main-process registry) --------------------------------
+  async function palette() {
+    if (!S.features.palette) return closePanel();
+    if (!commands) commands = await nx.cmd('commands.list');
     const wrap = el('div');
-    panelEl.style.cssText = 'left:50%;top:14vh;transform:translateX(-50%);width:min(640px,92vw)';
+    panelEl.style.cssText = 'left:50%;top:14vh;transform:translateX(-50%);width:min(660px,92vw)';
     const input = el('input', { placeholder: 'Type a command, tab, bookmark or site…', spellcheck: 'false' });
     const list = el('div', { class: 'pal-list' });
-    wrap.append(el('div', { class: 'pal-in' }, icon('cmd', 20), input), list);
+    wrap.append(el('div', { class: 'pal-in' }, icon('cmd', 18), input), list);
     panelEl.append(wrap);
-    let items = [], sel = 0, seq = 0;
+    let items = [], sel = 0, seq = 0, base = null;
     const draw = () => {
       list.replaceChildren();
       let group = '';
       items.forEach((it, i) => {
         if (it.group !== group) { group = it.group; list.append(el('div', { class: 'pal-group' }, group)); }
-        const row = el('div', { class: 'pal-item' + (i === sel ? ' sel' : '') },
+        const r = el('div', { class: 'pal-item' + (i === sel ? ' sel' : '') },
           it.tab && it.tab.favicon ? favNode(it.url, it.tab.favicon) : icon(it.icon), el('span', { class: 'grow' }, it.label, it.sub ? el('span', { class: 'dim' }, '  ' + it.sub) : null), it.kb ? el('span', { class: 'kb' }, it.kb) : null);
-        row.addEventListener('mousemove', () => { if (sel !== i) { sel = i; draw(); } });
-        row.addEventListener('click', () => run(it));
-        list.append(row);
+        r.addEventListener('mousemove', () => { if (sel !== i) { sel = i; draw(); } });
+        r.addEventListener('click', () => run(it));
+        list.append(r);
       });
       const s = list.querySelector('.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
     };
-    const run = (it) => { closePanel(); it.run(); };
+    const run = async (it) => {
+      if (it.pick) {
+        const sub = await nx.cmd('commands.items', it.pick);
+        input.value = ''; input.placeholder = it.label.replace(/…$/, '') + ' — type to filter';
+        base = sub.map((x) => ({ group: it.label.replace(/…$/, ''), icon: 'check', label: x.label, sub: x.sub, run: () => nx.cmd('commands.pick', { id: it.id, arg: x.arg }) }));
+        if (!base.length) base = [{ group: it.label.replace(/…$/, ''), icon: 'warn', label: 'Nothing here yet', run: () => {} }];
+        compute();
+        return;
+      }
+      closePanel(); it.run();
+    };
     const score = (label, q) => { label = label.toLowerCase(); if (label.includes(q)) return 100 - label.indexOf(q); let i = 0; for (const ch of label) if (ch === q[i]) i++; return i === q.length ? 10 : 0; };
     const compute = async () => {
       const q = input.value.trim().toLowerCase();
       const my = ++seq;
+      if (base) { items = base.filter((x) => !q || score(x.label + ' ' + (x.sub || ''), q)); sel = 0; draw(); return; }
       const out = [];
       const tabs = S.tabs.map((t) => ({ group: 'Open tabs', icon: 'globe', label: t.title || t.url, sub: hostOf(t.url), url: t.url, tab: t, run: () => nx.cmd('tab.activate', t.id), s: q ? score(t.title + ' ' + t.url, q) : 1 }));
-      const cmds = COMMANDS().map(([ic, label, kb, fn]) => ({ group: 'Commands', icon: ic, label, kb, run: fn, s: q ? score(label, q) : 1 }));
+      const cmds = commands.map((c) => ({ group: 'Commands', icon: c.danger ? 'trash' : 'cmd', id: c.id, pick: c.pick, label: c.title + (c.pick ? '…' : ''), kb: c.shortcuts[0] || '', run: () => nx.cmd('exec', { name: c.id }), s: q ? score(c.title + ' ' + c.category, q) : 1 }));
       const bms = bookmarks.map((b) => ({ group: 'Bookmarks', icon: 'star', label: b.title, sub: hostOf(b.url), run: () => nx.cmd('nav', { text: b.url }), s: q ? score(b.title + ' ' + b.url, q) : 0 }));
-      out.push(...(q ? tabs.filter((x) => x.s) : tabs.slice(0, 5)), ...cmds.filter((x) => x.s).sort((a, b) => b.s - a.s).slice(0, q ? 8 : 12), ...bms.filter((x) => x.s).slice(0, 4));
+      out.push(...(q ? tabs.filter((x) => x.s) : tabs.slice(0, 4)), ...cmds.filter((x) => x.s).sort((a, b) => b.s - a.s).slice(0, q ? 9 : 14), ...bms.filter((x) => x.s).slice(0, 4));
       if (q) {
         const sug = await nx.cmd('suggest', q);
         if (my !== seq) return;
         for (const s of sug.filter((x) => x.type === 'history').slice(0, 4)) out.push({ group: 'History', icon: 'clock', label: s.title, sub: hostOf(s.url), run: () => nx.cmd('nav', { text: s.url }) });
-        out.push({ group: 'Web', icon: 'search', label: sug[0] ? sug[0].title : q, run: () => nx.cmd('nav', { text: q, newTab: true }) });
+        for (const s of sug.filter((x) => x.type === 'calc' || x.type === 'convert').slice(0, 1)) out.unshift({ group: 'Answer', icon: 'calc', label: s.title, sub: s.sub + ' — Enter copies', run: () => nx.cmd('exec', { name: 'copyText', arg: s.value }) });
+        const se = sug.find((x) => x.type === 'search');
+        out.push({ group: 'Web', icon: 'search', label: se ? se.title : q, run: () => nx.cmd('nav', { text: q, newTab: true }) });
       }
       items = out; sel = 0; draw();
     };
@@ -422,35 +453,47 @@
       if (e.key === 'ArrowDown') { sel = Math.min(items.length - 1, sel + 1); draw(); e.preventDefault(); }
       else if (e.key === 'ArrowUp') { sel = Math.max(0, sel - 1); draw(); e.preventDefault(); }
       else if (e.key === 'Enter' && items[sel]) run(items[sel]);
-      else if (e.key === 'Escape') closePanel();
+      else if (e.key === 'Escape') {
+        if (base) { base = null; input.value = ''; input.placeholder = 'Type a command, tab, bookmark or site…'; compute(); e.stopPropagation(); }
+        else closePanel();
+      } else if (e.key === 'Backspace' && base && !input.value) { base = null; compute(); }
     });
     compute();
     setTimeout(() => input.focus(), 20);
   }
 
-  // ---- omnibox -------------------------------------------------------------------------------
+  // ---- omnibox -------------------------------------------------------------------------------------
   let sugs = [], sugSel = -1, sugSeq = 0, typed = '';
-  const sugIcon = { search: 'search', url: 'globe', history: 'clock', bookmark: 'star', tab: 'window' };
+  const sugIcon = { search: 'search', url: 'globe', history: 'clock', bookmark: 'star', tab: 'window', calc: 'calc', convert: 'swap', command: 'cmd', workspace: 'layers', setting: 'gear' };
+  const sugTag = { tab: 'Switch to tab', bookmark: 'Bookmark', command: 'Command', workspace: 'Workspace', setting: 'Setting', calc: 'Enter to copy', convert: 'Enter to copy' };
+  const NAV_TYPES = new Set(['url', 'history', 'bookmark', 'tab']);
   function drawSuggestions() {
     if (!sugs.length) { if (panel && panel.kind === 'sug') closePanelKeepFocus(); return; }
     if (!panel || panel.kind !== 'sug') { panel = { kind: 'sug' }; openOverlay(false); }
     const r = $('#omni').getBoundingClientRect();
     panelEl.style.cssText = `left:${r.left}px;top:${r.bottom + 6}px;width:${r.width}px`;
     panelEl.replaceChildren(el('div', { class: 'menu-pad' }, sugs.map((s, i) => {
+      const answer = s.type === 'calc' || s.type === 'convert';
       const row = el('div', { class: 'sug' + (i === sugSel ? ' sel' : '') },
-        el('span', { class: 's-ico' }, s.type === 'history' || s.type === 'bookmark' ? favNode(s.url, '', s.title) : icon(sugIcon[s.type] || 'globe')),
-        el('span', { class: 's-main' }, s.title, s.type !== 'search' && s.title !== s.url ? el('span', { class: 's-url' }, s.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70)) : null),
-        s.type === 'tab' ? el('span', { class: 's-tag' }, 'Switch to tab') : s.type === 'bookmark' ? el('span', { class: 's-tag' }, 'Bookmark') : null);
+        el('span', { class: 's-ico' }, s.type === 'history' || s.type === 'bookmark' ? favNode(s.url, '') : icon(sugIcon[s.type] || 'globe')),
+        el('span', { class: 's-main' }, answer ? el('span', { class: 's-calc' }, s.title) : s.title,
+          answer || s.sub ? el('span', { class: 's-url' }, s.sub) : (s.type !== 'search' && s.url && s.title !== s.url ? el('span', { class: 's-url' }, s.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70)) : null)),
+        sugTag[s.type] ? el('span', { class: 's-tag' }, sugTag[s.type]) : null);
       row.addEventListener('mousedown', (e) => { e.preventDefault(); chooseSuggestion(s, e.altKey); });
       return row;
     })));
   }
-  function closePanelKeepFocus() { panel = null; overlay.hidden = true; panelEl.replaceChildren(); nx.cmd('overlay', false); }
+  function closePanelKeepFocus() { panel = null; overlay.hidden = true; panelEl.replaceChildren(); panelEl.removeAttribute('style'); nx.cmd('overlay', false); }
   function chooseSuggestion(s, newTab) {
     closePanelKeepFocus();
     urlInput.blur();
-    if (s.type === 'tab') nx.cmd('tab.activate', s.tabId);
-    else nx.cmd('nav', { text: s.url, newTab });
+    switch (s.type) {
+      case 'tab': return nx.cmd('exec', { name: 'switchTab', arg: { win: s.winId, tab: s.tabId } });
+      case 'calc': case 'convert': return nx.cmd('exec', { name: 'copyText', arg: s.value });
+      case 'command': return s.pick ? nx.cmd('exec', { name: 'palette' }) : nx.cmd('exec', { name: s.cmd });
+      case 'workspace': return nx.cmd('commands.pick', { id: 'restoreWorkspace', arg: s.arg });
+      default: return nx.cmd('nav', { text: s.url, newTab });
+    }
   }
   urlInput.addEventListener('focus', () => { urlInput.select(); $('#url-display').replaceChildren(); });
   urlInput.addEventListener('blur', () => { omniEdited = false; setTimeout(() => { if (panel && panel.kind === 'sug') closePanelKeepFocus(); if (S) renderToolbar(); }, 120); });
@@ -464,24 +507,30 @@
     sugs = r; sugSel = 0; drawSuggestions();
   });
   urlInput.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown' && sugs.length) { sugSel = (sugSel + 1) % sugs.length; urlInput.value = sugs[sugSel].type === 'search' ? typed : sugs[sugSel].url; drawSuggestions(); e.preventDefault(); }
-    else if (e.key === 'ArrowUp' && sugs.length) { sugSel = (sugSel - 1 + sugs.length) % sugs.length; urlInput.value = sugs[sugSel].type === 'search' ? typed : sugs[sugSel].url; drawSuggestions(); e.preventDefault(); }
+    const setVal = (s) => { urlInput.value = NAV_TYPES.has(s.type) && s.url ? s.url : typed; };
+    if (e.key === 'ArrowDown' && sugs.length) { sugSel = (sugSel + 1) % sugs.length; setVal(sugs[sugSel]); drawSuggestions(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp' && sugs.length) { sugSel = (sugSel - 1 + sugs.length) % sugs.length; setVal(sugs[sugSel]); drawSuggestions(); e.preventDefault(); }
     else if (e.key === 'Enter') {
       e.preventDefault();
       const s = sugs[sugSel];
-      if (s && s.type === 'tab' && urlInput.value === s.url) return chooseSuggestion(s, false);
-      const text = urlInput.value;
+      if (s && ['calc', 'convert', 'command', 'workspace'].includes(s.type)) return chooseSuggestion(s, false);
+      if (s && s.type === 'tab' && (sugSel > 0 || urlInput.value === s.url)) return chooseSuggestion(s, false);
+      const text = s && s.type === 'setting' ? s.url : urlInput.value;
       closePanelKeepFocus(); urlInput.blur();
       nx.cmd('nav', { text, newTab: e.altKey });
     } else if (e.key === 'Escape') { urlInput.value = S && S.active ? S.active.url : ''; closePanelKeepFocus(); urlInput.blur(); }
   });
   $('#omni').addEventListener('mousedown', (e) => { if (e.target.closest('button')) return; if (document.activeElement !== urlInput) { e.preventDefault(); urlInput.focus(); urlInput.select(); } });
 
-  // ---- find bar / permission bar -------------------------------------------------------------
+  // ---- infobar: find / permission / text prompt ----------------------------------------------------
   const infobar = $('#infobar');
+  let barKind = null;
+  function openBar(kind) { barKind = kind; infobar.hidden = false; infobar.classList.toggle('danger', kind === 'perm'); }
+  function closeBar(kind) { if (barKind === kind) { barKind = null; infobar.hidden = true; infobar.replaceChildren(); infobar.classList.remove('danger'); } }
+
   function openFind() {
     findOpen = true;
-    infobar.hidden = false;
+    openBar('find');
     infobar.replaceChildren();
     const input = el('input', { type: 'text', placeholder: 'Find in page', spellcheck: 'false' });
     const count = el('span', { class: 'dim', id: 'find-count' }, '');
@@ -495,20 +544,30 @@
     nx.cmd('infobar', true).then(() => { input.focus(); input.select(); });
     infobar._find = { input, go };
   }
-  function closeFind() { findOpen = false; infobar.hidden = true; infobar.replaceChildren(); nx.cmd('find.close'); }
+  function closeFind() { findOpen = false; closeBar('find'); nx.cmd('find.close'); }
+
   let permShown = null;
   function showPermission(p) {
-    if (!p) { permShown = null; if (!findOpen) { infobar.hidden = true; infobar.replaceChildren(); } return; }
+    if (!p) { permShown = null; closeBar('perm'); return; }
     permShown = p; findOpen = false;
-    infobar.hidden = false;
-    const remember = el('input', { type: 'checkbox', checked: true });
-    const ans = (allow) => { nx.cmd('perm.answer', { id: p.id, allow, remember: remember.checked }); };
-    infobar.replaceChildren(icon('shield'), el('span', {}, el('b', {}, p.origin.host || 'This page'), ' wants to ' + p.origin.label),
-      el('span', { class: 'grow' }), el('label', { class: 'chk' }, remember, 'Remember'),
-      el('button', { class: 'btn primary', onclick: () => ans(true) }, 'Allow'), el('button', { class: 'btn', onclick: () => ans(false) }, 'Block'));
+    openBar('perm');
+    const ans = (mode) => nx.cmd('perm.answer', { id: p.id, mode });
+    infobar.replaceChildren(icon('warn'), el('span', {}, el('b', {}, p.origin.host || 'This page'), ' wants to ' + p.origin.label),
+      el('span', { class: 'grow' }),
+      el('button', { class: 'btn primary', onclick: () => ans('always') }, 'Allow'), el('button', { class: 'btn', onclick: () => ans('once') }, 'Allow once'),
+      el('button', { class: 'btn danger', onclick: () => ans('block') }, 'Block'), el('button', { class: 'ib', title: 'Dismiss', onclick: () => ans('dismiss') }, icon('x')));
   }
 
-  // ---- wiring --------------------------------------------------------------------------------
+  function showPrompt(p) {
+    openBar('prompt');
+    const input = el('input', { type: 'text', value: p.value, placeholder: p.label, spellcheck: 'false' });
+    const done = (v) => { closeBar('prompt'); nx.cmd('prompt.answer', { id: p.id, value: v }); };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') done(input.value); if (e.key === 'Escape') done(null); });
+    infobar.replaceChildren(el('b', {}, p.title), input, el('span', { class: 'grow' }), el('button', { class: 'btn primary', onclick: () => done(input.value) }, 'Save'), el('button', { class: 'btn', onclick: () => done(null) }, 'Cancel'));
+    setTimeout(() => { input.focus(); input.select(); }, 30);
+  }
+
+  // ---- wiring --------------------------------------------------------------------------------------
   $('#back').onclick = () => nx.cmd('exec', { name: 'back' });
   $('#forward').onclick = () => nx.cmd('exec', { name: 'forward' });
   $('#reload').onclick = () => nx.cmd('exec', { name: S && S.active && S.active.loading ? 'stop' : 'reload' });
@@ -528,20 +587,24 @@
 
   nx.on('state', render);
   nx.on('bookmarks', (b) => { bookmarks = b; renderBookmarks(); });
-  nx.on('downloads', (d) => { downloads = d; if (panel && panel.kind === 'downloads') showPanel('downloads', true); });
+  nx.on('downloads', (d) => { downloads = d; $('#dl').classList.toggle('active-dl', d.some((x) => x.state === 'progressing')); if (panel && panel.kind === 'downloads') showPanel('downloads', true); });
   nx.on('download-started', () => { if (!panel) $('#dl-dot').hidden = false; });
-  nx.on('toast', (msg) => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200); });
+  nx.on('toast', (msg) => {
+    const t = $('#toast'); const m = typeof msg === 'string' ? { text: msg } : msg;
+    t.textContent = m.text; t.classList.toggle('danger', !!m.danger); t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  });
   nx.on('focus-omnibox', () => { urlInput.focus(); urlInput.select(); });
-  nx.on('open-find', () => { if (findOpen && infobar._find) { infobar._find.input.focus(); infobar._find.input.select(); } else openFind(); });
+  nx.on('open-find', () => { if (findOpen && infobar._find && barKind === 'find') { infobar._find.input.focus(); infobar._find.input.select(); } else openFind(); });
   nx.on('find', (r) => { const c = $('#find-count'); if (c) c.textContent = r.matches ? `${r.active}/${r.matches}` : (infobar._find && infobar._find.input.value ? 'No results' : ''); });
   nx.on('find-next', (d) => { if (findOpen && infobar._find) infobar._find.go(d.forward, true); });
   nx.on('palette', () => showPanel('palette'));
   nx.on('permission', showPermission);
-  nx.on('escape', () => { if (panel) closePanel(); else if (findOpen) closeFind(); else if (permShown) nx.cmd('perm.answer', { id: permShown.id, allow: false, remember: false }); });
-  nx.on('fullscreen', () => {});
+  nx.on('prompt', showPrompt);
+  nx.on('escape', () => { if (panel) closePanel(); else if (barKind === 'find') closeFind(); else if (permShown) nx.cmd('perm.answer', { id: permShown.id, mode: 'dismiss' }); });
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { if (panel) { closePanel(); e.preventDefault(); } else if (findOpen) { closeFind(); e.preventDefault(); } }
+    if (e.key === 'Escape') { if (panel) { closePanel(); e.preventDefault(); } else if (barKind === 'find') { closeFind(); e.preventDefault(); } }
   });
   window.addEventListener('resize', () => { if (panel && panel.kind === 'sug') drawSuggestions(); });
 

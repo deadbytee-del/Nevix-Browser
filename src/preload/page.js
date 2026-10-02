@@ -4,7 +4,7 @@
 // exposes the internal API.
 const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
-let cfg = { fp: false, cosmetic: false, seed: 1, lang: false, thirdPartyCookies: false, internal: false };
+let cfg = { fp: false, strictFp: false, cosmetic: false, seed: 1, lang: false, thirdPartyCookies: false, autoplay: 'allow', popups: 'allow' };
 try { cfg = ipcRenderer.sendSync('nevix:page-config', location.href); } catch {}
 
 if (location.protocol === 'nevix:') {
@@ -15,9 +15,12 @@ if (location.protocol === 'nevix:') {
   });
 }
 
-if (cfg.fp && /^https?:|^file:|^about:/.test(location.protocol)) {
+// A page tried window.open() without a user gesture (reported by the main-world shim below).
+document.addEventListener('__nevix_popup_blocked', () => { try { ipcRenderer.send('nevix:popup-blocked', location.href); } catch {} });
+
+if (/^https?:|^file:|^about:/.test(location.protocol) && (cfg.fp || cfg.thirdPartyCookies || cfg.autoplay !== 'allow' || cfg.popups !== 'allow')) {
   contextBridge.executeInMainWorld({
-    args: [{ seed: cfg.seed, lang: cfg.lang, blockCookies: cfg.thirdPartyCookies }],
+    args: [{ seed: cfg.seed, lang: cfg.lang, blockCookies: cfg.thirdPartyCookies, fp: cfg.fp, strict: cfg.strictFp, autoplay: cfg.autoplay, popups: cfg.popups }],
     func: function fingerprintShield(opts) {
       'use strict';
       // ---- helpers -------------------------------------------------------------------------
@@ -53,6 +56,7 @@ if (cfg.fp && /^https?:|^file:|^about:/.test(location.protocol)) {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
 
+      if (opts.fp) {
       // ---- canvas --------------------------------------------------------------------------
       const noiseImage = (img) => {
         const d = img.data;
@@ -163,6 +167,70 @@ if (cfg.fp && /^https?:|^file:|^about:/.test(location.protocol)) {
 
       // ---- timers --------------------------------------------------------------------------
       wrap(Performance.prototype, 'now', (orig) => function now() { return Math.round(orig.call(this) * 10) / 10; });
+
+
+      // ---- font probing & strict-mode extras ---------------------------------------------------------
+      if (window.queryLocalFonts) {
+        wrap(window, 'queryLocalFonts', () => function queryLocalFonts() { return Promise.reject(new DOMException('Local font access is not permitted.', 'NotAllowedError')); });
+      }
+      wrap(CanvasRenderingContext2D.prototype, 'measureText', (orig) => function measureText(...a) {
+        const m = orig.apply(this, a);
+        const k = opts.strict ? 0.0004 : 0.00008;       // relative noise: invisible to layout, enough to blur width-based font probing
+        const f = 1 + (rnd() - 0.5) * k;
+        const w = m.width * f;
+        try { Object.defineProperty(m, 'width', { value: w }); } catch {}
+        return m;
+      });
+      if (opts.strict) {
+        const round2 = (v) => Math.round(v / 100) * 100 || v;
+        define(window, 'outerWidth', () => window.innerWidth);
+        define(window, 'outerHeight', () => window.innerHeight);
+        define(Screen.prototype, 'availWidth', () => round2(window.innerWidth));
+        define(Screen.prototype, 'availHeight', () => round2(window.innerHeight));
+        define(nav, 'plugins', () => Object.freeze([]));
+        define(nav, 'mimeTypes', () => Object.freeze([]));
+        if (window.speechSynthesis) wrap(SpeechSynthesis.prototype, 'getVoices', () => function getVoices() { return []; });
+        if (document.fonts && document.fonts.check) wrap(FontFaceSet.prototype, 'check', () => function check() { return true; });
+        wrap(Performance.prototype, 'now', (orig) => function now() { return Math.round(orig.call(this) * 0.01) / 0.01 * 1; });
+        if (window.Date) { /* timers are coarsened via performance.now above; Date stays exact for sites that need it */ }
+      }
+      }
+
+      // ---- per-site autoplay & pop-up policy (set from the site's permissions) ---------------------------
+      const activated = () => { try { return navigator.userActivation.hasBeenActive; } catch { return true; } };
+      if (opts.autoplay !== 'allow') {
+        wrap(HTMLMediaElement.prototype, 'play', (orig) => function play(...a) {
+          if (!activated() && !this.muted) return Promise.reject(new DOMException('play() failed because the user didn\'t interact with the document first.', 'NotAllowedError'));
+          return orig.apply(this, a);
+        });
+        document.addEventListener('play', (e) => {
+          const el = e.target;
+          if (el && el.pause && !activated() && !el.muted) { try { el.pause(); } catch {} }
+        }, true);
+        const AC = window.AudioContext;
+        if (AC) {
+          const Wrapped = function AudioContext(...a) {
+            const ctx = new AC(...a);
+            if (!activated()) {
+              try { ctx.suspend(); } catch {}
+              const go = () => { try { ctx.resume(); } catch {} };
+              for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, go, { once: true, capture: true });
+            }
+            return ctx;
+          };
+          Wrapped.prototype = AC.prototype;
+          mark(Wrapped, 'AudioContext');
+          try { Object.defineProperty(window, 'AudioContext', { value: Wrapped, configurable: true, writable: true }); } catch {}
+        }
+      }
+      if (opts.popups !== 'allow') {
+        wrap(window, 'open', (orig) => function open(...a) {
+          let active = true;
+          try { active = navigator.userActivation.isActive; } catch {}
+          if (!active) { try { document.dispatchEvent(new CustomEvent('__nevix_popup_blocked')); } catch {} return null; }
+          return orig.apply(this, a);
+        });
+      }
 
       // ---- third-party cookie access via script ---------------------------------------------
       if (opts.blockCookies && window.top !== window) {

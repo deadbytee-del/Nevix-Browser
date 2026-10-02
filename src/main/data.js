@@ -114,7 +114,7 @@ class Bookmarks {
 
 class Stats {
   constructor(dir) {
-    this.store = new Store(path.join(dir, 'stats.json'), { ads: 0, trackers: 0, upgrades: 0, params: 0, since: Date.now() });
+    this.store = new Store(path.join(dir, 'stats.json'), { ads: 0, trackers: 0, upgrades: 0, params: 0, bounces: 0, since: Date.now() });
   }
   bump(k) { this.store.data[k] = (this.store.data[k] || 0) + 1; this.store.save(); }
   get all() { return this.store.data; }

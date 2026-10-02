@@ -32,23 +32,32 @@ const FILTER_LISTS = [
 ];
 
 const SETTINGS = {
-  version: 1,
+  version: 2,
   general: {
     searchEngine: 'duckduckgo',
     customSearchUrl: '',
     homepage: 'nevix://newtab',
-    startup: 'newtab', // newtab | restore | homepage
-    theme: 'dark',     // dark | light | system
+    startup: 'newtab',     // newtab | restore | homepage
+    theme: 'dark',         // dark | light | system
     accent: '',            // '' = the Nevix palette; a #rrggbb value overrides --color-primary
     verticalTabs: false,
     sidebarCollapsed: false,
     bookmarksBar: true,
-    tabSleepMinutes: 20,
     saveHistory: true,
     askDownloadLocation: false,
     downloadDir: '',
     spellcheck: false,
-    restoreClosedTabs: true,
+  },
+  tabs: {
+    temporaryMinutes: 10,        // temporary tabs close themselves after this many idle minutes
+    closeWindowOnLastTab: true,
+  },
+  performance: {
+    idleAfterMinutes: 1,         // Active → Idle
+    freezeAfterMinutes: 5,       // Idle → Frozen (page JS stops)
+    suspendAfterMinutes: 20,     // Frozen → Suspended (renderer released, history kept)
+    discardAfterMinutes: 120,    // Suspended → Discarded (needs the tab-discarding flag); 0 = never
+    hardwareAcceleration: true,
   },
   privacy: {
     adblock: true,
@@ -61,7 +70,6 @@ const SETTINGS = {
     gpc: true,
     referrer: 'origin',        // full | origin | none  (applied to cross-site requests)
     webrtc: 'public-only',     // default | public-only | strict
-    blockAutoplay: true,
     spoofLanguage: false,
     doh: 'automatic',          // off | automatic | secure
     dohServer: 'https://cloudflare-dns.com/dns-query',
@@ -69,9 +77,25 @@ const SETTINGS = {
     clearOnExit: { history: false, cookies: false, cache: true, downloads: false },
     lists: FILTER_LISTS.map((l) => ({ id: l.id, enabled: l.enabled, updated: 0 })),
   },
-  siteShields: {},     // registrable domain -> { off: true }
-  sitePermissions: {}, // host -> { permission: 'allow'|'deny' }
-  siteZoom: {},        // host -> zoom level
+  security: {
+    dangerousDownloadWarnings: true,
+    permissionAbuseProtection: true,
+  },
+  downloads: {
+    maxConcurrent: 3,
+  },
+  extensions: {
+    enabled: true,
+  },
+  developer: {
+    devtoolsDock: 'right',     // right | bottom | undocked
+  },
+  advanced: {
+    crashReports: false,       // local-only minidumps; nothing is ever uploaded
+  },
+  shortcuts: {},               // commandId -> [accelerators]; absent = default
+  siteShields: {},             // registrable domain -> { off: true }
+  siteZoom: {},                // host -> zoom level
 };
 
 module.exports = { SETTINGS, SEARCH_ENGINES, KEYWORDS, FILTER_LISTS };
