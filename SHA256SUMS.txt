@@ -1,0 +1,2 @@
+15214b248507e9018dce8d9fe72d3d9568f69ed25cbdc02f3d559cee6b408463  Nevix-Portable.exe
+523282cf107b41bd9ea9c8336e3d4f2f6b67045cddebab5eea16e6d530576de6  Nevix-Setup.exe
