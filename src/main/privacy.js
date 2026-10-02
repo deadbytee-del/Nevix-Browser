@@ -123,7 +123,10 @@ class RuleSet {
   check(q) {
     const c = this.custom.check(q);
     if (c) return c;
-    return this.main.check(q);
+    const m = this.main.check(q);
+    // an exception in the user's own rules beats a block from the bundled/optional lists
+    if (m && m.action !== 'allow') { const ex = this.custom.exception(q, m.category); if (ex) return ex; }
+    return m;
   }
 
   lists() {

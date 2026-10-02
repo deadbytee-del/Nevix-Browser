@@ -132,6 +132,20 @@ app.whenReady().then(() => {
   // A run that survives half a minute is healthy: stop counting it towards a crash loop.
   setTimeout(() => recovery.healthy(), 30000).unref();
 
+  // `Nevix --benchmark[=out.json]` runs the built-in benchmark headlessly, prints the JSON result and exits.
+  const bm = process.argv.find((a) => a === '--benchmark' || a.startsWith('--benchmark='));
+  if (bm) {
+    setTimeout(async () => {
+      try {
+        const r = await nx.perf.bench.run({});
+        const out = JSON.stringify(r, null, 2);
+        if (bm.includes('=')) fs.writeFileSync(bm.split('=')[1], out);
+        console.log(out);
+        app.exit(0);
+      } catch (e) { console.error('benchmark failed:', e.message); app.exit(1); }
+    }, 1500);
+  }
+
   // Test harness hook: only active when the environment explicitly opts in (never from argv alone).
   const hook = e2e ? process.argv.indexOf('--nevix-e2e') : -1;
   if (hook !== -1 && process.argv[hook + 1]) {

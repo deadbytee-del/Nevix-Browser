@@ -65,7 +65,7 @@ class Downloads {
     const rec = {
       id, name, url, domain: hostOf(url) || 'local', state: 'progressing', received: 0, total: item.getTotalBytes(),
       path: '', time: Date.now(), private: isPrivate, speed: 0, eta: 0, mime: item.getMimeType(),
-      danger: assess(name, url, item.getMimeType()), retries: 0,
+      danger: this.app.settings.get('security.dangerousDownloadWarnings') === false ? null : assess(name, url, item.getMimeType()), retries: 0,
     };
 
     // Per-site policy: block, ask, or allow.

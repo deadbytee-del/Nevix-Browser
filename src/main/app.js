@@ -31,6 +31,8 @@ class NevixApp {
     this.recovery = boot.recovery;
     this.marks = boot.marks;
     this.userData = boot.userData;
+    // First run = no settings yet, or the installer dropped a marker asking us to offer an import.
+    this.firstRun = !fs.existsSync(path.join(this.userData, 'settings.json')) || fs.existsSync(path.join(this.userData, 'first-run-import'));
     this.settings = new Store(path.join(this.userData, 'settings.json'), SETTINGS);
     this.history = new History(this.userData);
     this.bookmarks = new Bookmarks(this.userData);
@@ -103,6 +105,8 @@ class NevixApp {
     // Optional filter lists refresh once, shortly after startup, and only if the user enabled some.
     const stale = this.settings.get('privacy.lists').some((l) => l.enabled && Date.now() - l.updated > 7 * 864e5);
     if (stale) setTimeout(() => this.updateLists().catch(() => {}), 15000).unref();
+    if (this.settings.get('extensions.enabled') && fs.existsSync(path.join(this.userData, 'extensions.json'))) setTimeout(() => this.ext.init().catch(() => {}), 600).unref();
+    setTimeout(() => this.perf.recordLaunch(), 3000).unref();
     if (!this.flags.on('nevix-enable-startup-lazy-init')) this.eagerInit();
     else setImmediate(() => this.life); // lifecycle manager is idle until a tab goes to the background
   }
@@ -272,6 +276,7 @@ class NevixApp {
       userData: this.userData, portable: this.boot.portable, safeMode: this.boot.safeMode, packaged: app.isPackaged,
       isDefault: app.isDefaultProtocolClient('https'), crashReports: !!this.settings.get('advanced.crashReports'),
       hardwareAcceleration: this.settings.get('performance.hardwareAcceleration'),
+      firstRun: this.firstRun && !this.settings.get('general.importDismissed'),
     };
   }
 

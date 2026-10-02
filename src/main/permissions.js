@@ -181,6 +181,7 @@ class Permissions {
       this.pending.delete(key);
       const allow = answer.allow;
       const persist = !tab.win.isPrivate;
+      if (allow && (need.includes('camera') || need.includes('microphone'))) tab.usesMedia = true;   // never freeze a tab that is recording
       for (const id of need) {
         const k = `${origin}|${id}`;
         if (allow && answer.mode === 'once') this.allowOnce(tabKey, origin, id);
@@ -190,7 +191,7 @@ class Permissions {
           // Dismissed: remember refusals, and stop asking once a site is clearly nagging.
           const n = (this.denials.get(k) || 0) + 1;
           this.denials.set(k, n);
-          if (n >= 3) this.set(origin, id, 'block', { persist: false });
+          if (n >= 3 && this.app.settings.get('security.permissionAbuseProtection') !== false) this.set(origin, id, 'block', { persist: false });
         }
       }
       return allow;

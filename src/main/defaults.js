@@ -47,6 +47,7 @@ const SETTINGS = {
     askDownloadLocation: false,
     downloadDir: '',
     spellcheck: false,
+    importDismissed: false,    // the first-run "import from another browser" offer
   },
   tabs: {
     temporaryMinutes: 10,        // temporary tabs close themselves after this many idle minutes

@@ -11,7 +11,7 @@ const path = require('path');
 const FLAGS = [
   // ---- Performance
   { id: 'nevix-enable-aggressive-tab-freezing', category: 'Performance', name: 'Aggressive tab freezing',
-    description: 'Moves background tabs through the idle → frozen → suspended stages four times faster than the configured thresholds (minimum one minute per stage).',
+    description: 'Moves background tabs through the idle → frozen → suspended stages four times faster than the configured thresholds (never faster than 15 seconds per stage).',
     default: false, experimental: true, restart: false },
   { id: 'nevix-enable-memory-pressure-manager', category: 'Performance', name: 'Memory-pressure manager',
     description: 'While system memory is low, Nevix freezes, suspends and discards the least recently used background tabs until memory recovers. Checks run only while this flag is on and background tabs exist.',
@@ -27,7 +27,7 @@ const FLAGS = [
     description: 'Also blocks third-party tracking pixels and beacons (image, ping and XHR requests carrying tracking identifiers) and every request type of known tracker domains. May break embedded widgets.',
     default: false, experimental: true, restart: false },
   { id: 'nevix-enable-strict-fingerprinting-protection', category: 'Privacy', name: 'Strict fingerprinting protection',
-    description: 'Stronger mitigations: standardised screen and window metrics, 100 ms timer resolution, empty plugin/MIME lists, no speech-voice or font enumeration, and heavier canvas/WebGL/audio noise. Some sites that depend on those APIs may misbehave.',
+    description: 'Stronger mitigations: standardised screen and window metrics, 100 ms timer resolution, empty plugin/MIME lists, no speech voices, restricted font-probing APIs and heavier text-measurement noise. Some sites that depend on those APIs may misbehave.',
     default: false, experimental: true, restart: false },
   { id: 'nevix-enable-bounce-tracking-protection', category: 'Privacy', name: 'Bounce-tracking protection',
     description: 'Detects navigations that bounce through an intermediary site you never visited and deletes that site\'s cookies and storage afterwards.',

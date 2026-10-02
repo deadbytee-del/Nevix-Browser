@@ -12,6 +12,11 @@ if (location.protocol === 'nevix:') {
   contextBridge.exposeInMainWorld('nevix', {
     call,
     onChange(fn) { ipcRenderer.on('nevix:changed', (_e, topic) => fn(topic)); },
+    /** Live data pushed by the main process (whitelisted channels only). */
+    on(channel, fn) {
+      if (!['net-event', 'diag-event', 'bench-progress'].includes(channel)) return;
+      ipcRenderer.on('nevix:' + channel, (_e, data) => fn(data));
+    },
   });
 }
 

@@ -1,0 +1,23 @@
+module.exports = async ({ nx, w, check, load, sleep, waitFor }) => {
+  await load('http://site.test/ws1'); w.newTab({ url: 'http://site.test/ws2' });
+  await waitFor(() => w.active.title === 'site.test', 6000);
+  const id = nx.spaces.saveWorkspace(w, 'Research');
+  check('workspace saved', !!id && nx.spaces.listWorkspaces().some((x) => x.name === 'Research' && x.tabs.length >= 2));
+  const id2 = nx.spaces.saveWorkspace(w, 'research');
+  check('same name updates in place', id2 === id && nx.spaces.listWorkspaces().filter((x) => /research/i.test(x.name)).length === 1);
+  const before = nx.windows.size;
+  nx.spaces.restoreWorkspace(id, w, 'window');
+  await waitFor(() => nx.windows.size === before + 1, 5000);
+  check('workspace restores into a new window', nx.windows.size === before + 1);
+  nx.spaces.renameWorkspace(id, 'Renamed');
+  check('rename', nx.spaces.listWorkspaces()[0].name === 'Renamed');
+  const snap = nx.spaces.saveSnapshot('snap1');
+  check('snapshot saved', nx.spaces.listSnapshots().length >= 1);
+  nx.spaces.deleteWorkspace(id);
+  check('delete workspace', !nx.spaces.listWorkspaces().some((x) => x.id === id));
+  const pw = nx.createWindow({ private: true });
+  await sleep(500);
+  pw.newTab && pw.newTab({ url: 'http://site.test/priv' });
+  check('private window cannot be saved', nx.spaces.saveWorkspace(pw, 'Nope') === null);
+  pw.win.close();
+};

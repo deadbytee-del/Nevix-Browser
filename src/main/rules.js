@@ -256,26 +256,36 @@ class Rules {
     }
     if (!hit) return null;
     if (hit.action === 'allow') return { action: 'allow', category: hit.category, list: this.listNames[hit.l], rule: hit.rule };
-
-    // exceptions
     if (!hit.important) {
-      for (let d = host; ; ) {
-        const ai = this.allowDomains.get(d);
-        if (ai !== undefined) return { action: 'allow', category: hit.category, list: this.listNames[ai], rule: '@@||' + d + '^' };
-        if (d === reg) break;
-        const i = d.indexOf('.');
-        if (i === -1) break;
-        d = d.slice(i + 1);
-      }
-      if (this.exTokens.size || this.exFallback.length) {
-        for (const t of tokenize(q.url)) {
-          const rs = this.exTokens.get(t);
-          if (rs) for (const r of rs) if (this.ruleMatches(r, q, bit, third, topReg)) return { action: 'allow', category: hit.category, list: this.listNames[r.l], rule: '@@' + r.src };
-        }
-        for (const r of this.exFallback) if (this.ruleMatches(r, q, bit, third, topReg)) return { action: 'allow', category: hit.category, list: this.listNames[r.l], rule: '@@' + r.src };
-      }
+      const ex = this.exception(q, hit.category);
+      if (ex) return ex;
     }
     return { action: hit.action, category: hit.category, list: this.listNames[hit.l], rule: hit.rule };
+  }
+
+  /** Does an exception (`@@`) rule in THIS rule set cover the request? Used by check() and by RuleSet to let custom exceptions beat bundled blocks. */
+  exception(q, category = 'trackers') {
+    const host = q.host;
+    const reg = registrable(host);
+    const topReg = q.topHost ? registrable(q.topHost) : '';
+    const third = !!topReg && reg !== topReg;
+    const bit = TYPE_BITS[q.type] || TYPE_BITS.other;
+    for (let d = host; ; ) {
+      const ai = this.allowDomains.get(d);
+      if (ai !== undefined) return { action: 'allow', category, list: this.listNames[ai], rule: '@@||' + d + '^' };
+      if (d === reg) break;
+      const i = d.indexOf('.');
+      if (i === -1) break;
+      d = d.slice(i + 1);
+    }
+    if (this.exTokens.size || this.exFallback.length) {
+      for (const t of tokenize(q.url)) {
+        const rs = this.exTokens.get(t);
+        if (rs) for (const r of rs) if (this.ruleMatches(r, q, bit, third, topReg)) return { action: 'allow', category, list: this.listNames[r.l], rule: '@@' + r.src };
+      }
+      for (const r of this.exFallback) if (this.ruleMatches(r, q, bit, third, topReg)) return { action: 'allow', category, list: this.listNames[r.l], rule: '@@' + r.src };
+    }
+    return null;
   }
 
   ruleMatches(r, q, bit, third, topReg) {

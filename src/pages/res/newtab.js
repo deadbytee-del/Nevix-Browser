@@ -26,6 +26,14 @@
     const stat = (n, l) => el('div', { class: 'stat1' }, el('b', {}, num(n)), el('span', {}, l));
     $('#stats').replaceChildren(stat(st.ads, 'ads blocked'), stat(st.trackers, 'trackers blocked'), stat(st.upgrades, 'https upgrades'), stat(st.params, 'links cleaned'));
   };
+  call('app:info').then((i) => {
+    if (!i.firstRun) return;
+    const bar = el('div', { class: 'notice', style: 'text-align:left;margin:0 0 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap' },
+      el('span', { style: 'flex:1' }, 'Coming from another browser? Nevix can import your bookmarks (and history) from this computer — nothing leaves your device.'),
+      el('a', { class: 'btn sm primary', href: 'nevix://settings?s=import-browser#General' }, 'Import…'),
+      el('button', { class: 'btn sm', onclick: async () => { await call('newtab:dismissImport'); bar.remove(); } }, 'Not now'));
+    $('main').prepend(bar);
+  }).catch(() => {});
   render();
   window.nevix.onChange(render);
 })();

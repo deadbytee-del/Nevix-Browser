@@ -330,7 +330,9 @@ class Tab {
 
   /** Drop everything but the URL and title. */
   discard() {
-    if (!this.view || this.win.activeId === this.id) return false;
+    if (this.win.activeId === this.id) return false;
+    if (this.stage === 'suspended') { this.stage = 'discarded'; this.restore = null; this.win.scheduleState(); return true; }
+    if (!this.view) return false;
     this.release('discarded');
     this.restore = null;
     return true;

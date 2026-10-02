@@ -345,6 +345,7 @@ function registerIpc(nx) {
 
     // ---- about / recovery / errors / auth --------------------------------------------------------------
     'app:info': () => nx.aboutInfo(),
+    'newtab:dismissImport': () => { S.set('general.importDismissed', true); try { fs.unlinkSync(path.join(nx.userData, 'first-run-import')); } catch {} return true; },
     'recovery:info': () => nx.recoveryInfo(),
     'recovery:restore': () => { nx.restoreSession(); return true; },
     'recovery:fresh': () => { nx.startFresh(); return true; },
@@ -372,6 +373,12 @@ function registerIpc(nx) {
       return true;
     },
   };
+
+  // Test hook (only with NEVIX_E2E=1): call page commands / UI commands without a page.
+  if (process.env.NEVIX_E2E === '1') {
+    nx.ipcInternal = (cmd, arg, win) => INTERNAL[cmd]({ sender: { send() {}, isDestroyed: () => false, once() {} } }, arg || {}, win || nx.lastWindow, undefined);
+    nx.ipcUi = (name, arg, win) => UI[name](win || nx.lastWindow, arg || {});
+  }
 
   ipcMain.handle('nevix:internal', async (e, cmd, arg) => {
     const frame = e.senderFrame;

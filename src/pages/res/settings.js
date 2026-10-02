@@ -1,153 +1,172 @@
 'use strict';
 (() => {
-  const { $, el, call, icon, num, bytes } = NX;
+  const { $, el, call, icon, toast, confirmDialog, bytes } = NX;
   const root = $('#root');
-  let cfg;
-  const MOD = navigator.platform.includes('Mac') ? '⌘' : 'Ctrl+';
-  const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1600); };
-  const get = (path) => path.split('.').reduce((o, k) => o && o[k], cfg);
-  const set = async (path, value) => { await call('settings:set', { path, value }); toast('Saved'); };
+  const isMac = /Mac/i.test(navigator.platform);
+  let D;                 // { categories, schema, values, ... }
+  let cat = 'General', q = '', highlight = '';
+  const params = new URLSearchParams(location.search);
 
-  const toggle = (path, label, desc) => {
-    const sw = el('div', { class: 'switch' + (get(path) ? ' on' : ''), role: 'switch' });
-    sw.onclick = async () => { const v = !get(path); await set(path, v); sw.classList.toggle('on', v); };
-    return el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, label), desc ? el('div', { class: 'd' }, desc) : null), sw);
-  };
-  const select = (path, label, desc, opts) => {
-    const s = el('select', {}, ...opts.map(([v, t]) => el('option', { value: v, selected: String(get(path)) === String(v) }, t)));
-    s.onchange = () => set(path, s.value);
-    return el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, label), desc ? el('div', { class: 'd' }, desc) : null), s);
-  };
-  const text = (path, label, desc, ph = '') => {
-    const i = el('input', { type: 'text', value: get(path) || '', placeholder: ph, spellcheck: 'false' });
-    i.onchange = () => set(path, i.value.trim());
-    return el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, label), desc ? el('div', { class: 'd' }, desc) : null), i);
-  };
-  const number = (path, label, desc) => {
-    const i = el('input', { type: 'number', value: get(path), min: 0, max: 1440 });
-    i.onchange = () => set(path, Math.max(0, parseInt(i.value, 10) || 0));
-    return el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, label), desc ? el('div', { class: 'd' }, desc) : null), i);
-  };
-  const row = (label, desc, control) => el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, label), desc ? el('div', { class: 'd' }, desc) : null), control);
-  const group = (title, ...items) => el('div', { class: 'group' }, title ? el('h3', {}, title) : null, ...items);
-  const sect = (id, title, sub, ...kids) => el('section', { id }, el('h1', {}, title), el('p', { class: 'sub' }, sub), ...kids);
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const set = async (key, value) => { try { await call('settings:set', { key, value }); D.values[key] = value; toast('Saved'); } catch (e) { toast(String(e.message || e).replace(/^.*Error: /, ''), true); } };
+  const reset = async (key) => { await call('settings:reset', { key }); await load(); toast('Reset to default'); };
 
-  async function build() {
-    cfg = await call('settings:get');
-    const [info, stats] = await Promise.all([call('app:info'), call('stats:get')]);
-    const g = cfg.general;
+  function resetBtn(s) {
+    const cur = D.values[s.key];
+    const changed = s.default !== undefined && !same(cur, s.default);
+    return el('button', { class: 'btn sm ghost rs', title: 'Reset to default', style: changed ? '' : 'visibility:hidden', onclick: () => reset(s.key) }, icon('reset'));
+  }
 
-    const hero = el('div', { class: 'hero' }, el('div', {}, el('div', { class: 'big' }, num(stats.ads + stats.trackers)), el('div', { class: 'dim' }, 'ads & trackers blocked since ' + new Date(stats.since).toLocaleDateString())),
-      el('div', { class: 'cells' }, [['upgrades', 'HTTPS upgrades'], ['params', 'Links cleaned']].map(([k, l]) => el('div', { class: 'cell' }, el('b', {}, num(stats[k])), el('span', {}, l))),
-        el('div', { class: 'cell' }, el('b', {}, num(cfg.listCount)), el('span', {}, 'Block rules active'))));
+  function control(s) {
+    const v = D.values[s.key];
+    switch (s.type) {
+      case 'toggle': { const sw = el('button', { class: 'switch' + (v ? ' on' : ''), role: 'switch', 'aria-checked': String(!!v), 'aria-label': s.title }); sw.onclick = async () => { await set(s.key, !D.values[s.key]); sw.classList.toggle('on', !!D.values[s.key]); sw.setAttribute('aria-checked', String(!!D.values[s.key])); }; return sw; }
+      case 'select': { const x = el('select', { 'aria-label': s.title }, s.options.map(([val, label]) => el('option', { value: val, selected: String(v) === String(val) }, label))); x.onchange = () => set(s.key, x.value); return x; }
+      case 'number': { const x = el('input', { type: 'number', value: v, min: s.min, max: s.max, 'aria-label': s.title }); x.onchange = () => set(s.key, +x.value); return x; }
+      case 'text': { const x = el('input', { type: 'text', value: v || '', placeholder: s.placeholder || '', spellcheck: 'false', 'aria-label': s.title }); x.onchange = () => set(s.key, x.value.trim()); return x; }
+      case 'color': { const x = el('input', { type: 'color', value: v || '#9d64a3', 'aria-label': s.title }); x.onchange = () => { set(s.key, x.value); document.documentElement.style.setProperty('--color-primary', x.value); }; return el('div', { class: 'ctl' }, x, v ? el('button', { class: 'btn sm', onclick: async () => { await call('settings:set', { key: s.key, value: '' }); document.documentElement.style.removeProperty('--color-primary'); load(); } }, 'Use Nevix palette') : el('span', { class: 'dim' }, 'Nevix palette')); }
+      case 'folder': return el('div', { class: 'ctl' }, el('span', { class: 'dim mono', style: 'max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, v || 'System Downloads'), el('button', { class: 'btn sm', onclick: async () => { if (await call('download:dir')) load(); } }, 'Change…'));
+      case 'link': return el('a', { class: 'btn sm', href: s.href }, s.label || 'Open');
+      case 'action': return el('button', { class: 'btn sm' + (s.danger ? ' danger' : ''), onclick: () => runAction(s) }, s.label);
+      default: return null;
+    }
+  }
 
-    const sections = [
-      sect('privacy', 'Privacy & shields', 'Everything here is on by default. Shields are applied before a page can see you.', hero,
-        group('Blocking',
-          toggle('privacy.adblock', 'Block ads', 'Stops ad networks from loading.'),
-          toggle('privacy.trackers', 'Block trackers', 'Analytics, pixels, session-replay and fingerprinting scripts.'),
-          toggle('privacy.cosmetic', 'Hide cookie banners & ad slots', 'Cleans up leftover empty ad boxes and consent pop-ups.'),
-          toggle('privacy.thirdPartyCookies', 'Block third-party cookies', 'Cross-site cookies are never sent or stored.'),
-          toggle('privacy.stripTrackingParams', 'Remove tracking parameters from links', 'utm_*, fbclid, gclid, msclkid and ~50 others.')),
-        group('Connection',
-          toggle('privacy.httpsOnly', 'HTTPS-only mode', 'Upgrades every http:// request. If a site has no HTTPS you get a warning before continuing.'),
-          select('privacy.doh', 'Secure DNS', 'Encrypts the website lookups your ISP would otherwise see.', [['off', 'Off (system DNS)'], ['automatic', 'Automatic (fall back to system)'], ['secure', 'Always (strict)']]),
-          text('privacy.dohServer', 'DNS-over-HTTPS server', 'Used when Secure DNS is on.', 'https://cloudflare-dns.com/dns-query'),
-          text('privacy.proxy', 'Proxy', 'Route all traffic through a proxy, e.g. socks5://127.0.0.1:9050 for Tor. Leave blank for system settings.', 'socks5://127.0.0.1:9050')),
-        group('Fingerprinting & identity',
-          toggle('privacy.fingerprint', 'Fingerprint protection', 'Adds per-site noise to canvas, WebGL and audio; hides precise hardware, battery and screen details.'),
-          toggle('privacy.gpc', 'Send Global Privacy Control', 'Tells sites not to sell or share your data.'),
-          toggle('privacy.spoofLanguage', 'Report generic language (en-US)', 'Makes you look like everyone else. May show sites in English.'),
-          select('privacy.referrer', 'Referrer for cross-site requests', 'What the next site learns about where you came from.', [['origin', 'Only the site name'], ['none', 'Nothing'], ['full', 'Full address (browser default)']]),
-          select('privacy.webrtc', 'WebRTC IP handling', 'Prevents video-call APIs from leaking your local network address.', [['public-only', 'Hide local IP (recommended)'], ['strict', 'Strict — only via proxy (may break calls)'], ['default', 'Default']]),
-          toggle('privacy.blockAutoplay', 'Block autoplaying media', 'Requires a click before audio or video plays. Applies to new tabs.')),
-        group('On exit, clear…',
-          toggle('privacy.clearOnExit.history', 'Browsing history'), toggle('privacy.clearOnExit.cookies', 'Cookies & site data'),
-          toggle('privacy.clearOnExit.cache', 'Cached files'), toggle('privacy.clearOnExit.downloads', 'Download list'))),
+  async function runAction(s) {
+    switch (s.action) {
+      case 'default-browser': { const r = await call('action:run', { action: 'default-browser' }); toast(r === 'opened' ? 'Choose Nevix in the Windows settings window' : r === 'set' ? 'Nevix is now the default' : 'Could not change the default — use your system settings', r === 'failed'); break; }
+      case 'open-profile': await call('action:run', { action: 'open-profile' }); break;
+      case 'reset-settings': if (await confirmDialog('Reset all settings?', 'Every setting returns to its default. Bookmarks, history and flags are not touched.', { danger: true, ok: 'Reset settings' })) { await call('settings:resetAll'); await load(); toast('Settings reset'); } break;
+      case 'clear-data': case 'import-browser': inline = inline === s.action ? null : s.action; render(); break;
+      default: break;
+    }
+  }
+  let inline = null;
 
-      sect('general', 'General', 'Startup, tabs and everyday behaviour.',
-        group('Startup',
-          select('general.startup', 'When Nevix starts', '', [['newtab', 'Open a new tab'], ['restore', 'Continue where I left off'], ['homepage', 'Open my homepage']]),
-          text('general.homepage', 'Homepage', '', 'nevix://newtab')),
-        group('Tabs & memory',
-          number('general.tabSleepMinutes', 'Sleep inactive tabs after (minutes)', 'Frees memory by unloading background tabs. 0 turns it off.'),
-          toggle('general.verticalTabs', 'Vertical tabs', 'Move tabs to a sidebar. Toggle anytime with ' + MOD + 'Shift+E.'),
-          toggle('general.bookmarksBar', 'Show bookmarks bar')),
-        group('History',
-          toggle('general.saveHistory', 'Save browsing history', 'Kept locally; powers address-bar suggestions and the new-tab page.'),
-          toggle('general.spellcheck', 'Spell check', 'Off by default on Windows/Linux because dictionaries are normally fetched from a third party.')),
-        group('Default browser', row('Make Nevix your default browser', info.isDefault ? 'Nevix is already the default.' : '', el('button', { class: 'btn primary', onclick: async () => { const ok = await call('default:set'); toast(ok ? 'Nevix is now the default' : 'Couldn’t set default — use your system settings'); } }, 'Set as default')))),
+  // ---- inline panels ---------------------------------------------------------------------------------
+  function clearPanel() {
+    const boxes = { history: true, cookies: true, cache: true, downloads: false };
+    const labels = { history: 'Browsing history', cookies: 'Cookies and site data', cache: 'Cached files', downloads: 'Download list' };
+    const range = el('select', {}, el('option', { value: 1 }, 'Last hour'), el('option', { value: 24 }, 'Last 24 hours'), el('option', { value: 168 }, 'Last 7 days'), el('option', { value: 0, selected: true }, 'All time'));
+    return el('div', { class: 'panelbox' }, el('div', { class: 'checks' }, Object.keys(boxes).map((k) => el('label', {}, el('input', { type: 'checkbox', checked: boxes[k], onchange: (e) => { boxes[k] = e.target.checked; } }), labels[k]))),
+      el('div', { class: 'row', style: 'padding:0 16px 8px' }, el('span', { class: 'dim' }, 'Time range'), range,
+        el('button', { class: 'btn danger', onclick: async () => { if (await confirmDialog('Clear this data?', 'This cannot be undone.', { danger: true, ok: 'Clear' })) { await call('data:clear', { ...boxes, range: +range.value }); toast('Cleared'); } } }, 'Clear data')));
+  }
 
-      sect('appearance', 'Appearance', 'Make it yours.',
-        group('', select('general.theme', 'Theme', '', [['system', 'Match system'], ['dark', 'Dark'], ['light', 'Light']]),
-          row('Accent colour', '', (() => { const c = el('input', { type: 'color', value: g.accent }); c.onchange = () => { set('general.accent', c.value); document.documentElement.style.setProperty('--color-primary', c.value); }; return c; })()))),
+  function importPanel() {
+    const box = el('div', { class: 'panelbox' }, el('span', { class: 'dim' }, 'Looking for browsers on this computer…'));
+    call('import:scan').then((found) => {
+      if (!found.length) { box.replaceChildren(el('span', { class: 'dim' }, 'No supported browser profiles were found.')); return; }
+      const what = { bookmarks: true, history: false };
+      let pick = { browser: found[0].id, profile: found[0].profiles[0].dir };
+      const prof = el('select', {});
+      const br = el('select', { onchange: () => { const b = found.find((x) => x.id === br.value); pick.browser = b.id; fill(b); } }, found.map((b) => el('option', { value: b.id }, b.name)));
+      const fill = (b) => { prof.replaceChildren(...b.profiles.map((p) => el('option', { value: p.dir }, p.label))); pick.profile = b.profiles[0].dir; };
+      prof.onchange = () => { pick.profile = prof.value; };
+      fill(found[0]);
+      box.replaceChildren(el('div', { class: 'row', style: 'margin-bottom:10px' }, br, prof),
+        el('div', { class: 'checks' }, el('label', {}, el('input', { type: 'checkbox', checked: true, onchange: (e) => { what.bookmarks = e.target.checked; } }), 'Bookmarks'), el('label', {}, el('input', { type: 'checkbox', onchange: (e) => { what.history = e.target.checked; } }), 'Browsing history')),
+        el('div', { class: 'dim', style: 'margin:0 0 10px;font-size:12.5px' }, 'Data is read locally and copied into Nevix. Passwords and cookies are never imported.'),
+        el('button', { class: 'btn primary', onclick: async () => { try { const r = await call('import:run', { ...pick, what }); toast(`Imported ${r.bookmarks} bookmarks, ${r.history} history entries`); } catch (e) { toast('Import failed: ' + String(e.message).replace(/^.*Error: /, ''), true); } } }, 'Import'));
+    });
+    return box;
+  }
 
-      sect('search', 'Search', 'Nevix sends nothing to a search engine until you press Enter. Suggestions are computed locally.',
-        group('', select('general.searchEngine', 'Search engine', '', Object.entries(cfg.engines).map(([k, v]) => [k, v.name])),
-          text('general.customSearchUrl', 'Custom search URL', 'Use %s where the query goes — e.g. your own SearXNG instance.', 'https://searx.example/search?q=%s')),
-        group('Shortcuts you can type in the address bar', el('div', { class: 'chips' }, ['w', 'yt', 'gh', 'mdn', 'npm', 'so', 'maps', 'imdb', 'r', ...Object.values(cfg.engines).filter((e) => e.url).map((e) => e.keyword)].map((k) => el('span', { class: 'chip' }, el('kbd', {}, k), '+ space + query'))))),
+  // ---- shortcuts ---------------------------------------------------------------------------------------
+  function accelFrom(e) {
+    if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return null;
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    let key = e.key.length === 1 ? e.key.toUpperCase() : e.key === ' ' ? 'Space' : e.key;
+    return (mod ? 'Mod+' : '') + (isMac && e.ctrlKey ? 'Ctrl+' : '') + (e.altKey ? 'Alt+' : '') + (e.shiftKey && !(key.length === 1 && !/[A-Z0-9]/.test(key)) ? 'Shift+' : '') + key;
+  }
+  async function shortcutsSection() {
+    const list = await call('shortcuts:list');
+    let filter = '', capturing = null, msg = '';
+    const wrap = el('div');
+    const draw = () => {
+      const f = list.filter((c) => !filter || (c.title + ' ' + c.category + ' ' + c.shortcuts.join(' ')).toLowerCase().includes(filter.toLowerCase()));
+      const search = el('input', { type: 'search', placeholder: 'Search commands or shortcuts', value: filter, style: 'width:100%' });
+      search.addEventListener('input', () => { filter = search.value; draw(); const s = wrap.querySelector('input'); s.focus(); s.setSelectionRange(filter.length, filter.length); });
+      wrap.replaceChildren(el('div', { class: 'panelbox' }, search, msg ? el('div', { class: 'danger-text', style: 'margin-top:8px' }, msg) : null,
+        el('div', { style: 'margin-top:8px' }, el('button', { class: 'btn sm', onclick: async () => { if (await confirmDialog('Reset all shortcuts?', 'Every shortcut returns to its default.', { ok: 'Reset' })) { await call('shortcuts:resetAll'); location.reload(); } } }, 'Reset all shortcuts'))),
+        ...f.map((c) => el('div', { class: 'keyrow' + (capturing === c.id ? ' capture' : '') },
+          el('span', { class: 'name' }, c.title, c.custom ? el('span', { class: 'badge primary', style: 'margin-left:8px' }, 'custom') : null), el('span', { class: 'cat' }, c.category),
+          el('span', {}, capturing === c.id ? el('span', { class: 'dim' }, 'Press the new shortcut… (Esc to cancel)') : (c.shortcuts.length ? c.shortcuts.map((s) => el('kbd', { class: 'accel' }, s)) : el('span', { class: 'dim' }, 'none'))),
+          el('button', { class: 'btn sm', onclick: () => { capturing = capturing === c.id ? null : c.id; msg = ''; draw(); } }, capturing === c.id ? 'Cancel' : 'Change'),
+          el('button', { class: 'btn sm ghost', title: 'Reset to default', style: c.custom ? '' : 'visibility:hidden', onclick: async () => { await call('shortcuts:reset', { id: c.id }); location.reload(); } }, icon('reset')))));
+    };
+    window.onkeydown = async (e) => {
+      if (!capturing) return;
+      e.preventDefault();
+      if (e.key === 'Escape') { capturing = null; draw(); return; }
+      const a = accelFrom(e);
+      if (!a) return;
+      const r = await call('shortcuts:set', { id: capturing, accels: [a] });
+      if (r.error) { msg = r.error; draw(); return; }
+      location.reload();
+    };
+    draw();
+    return wrap;
+  }
 
-      sect('data', 'Clear browsing data', 'Wipe what Nevix has stored on this device.', (() => {
-        const boxes = { history: true, cookies: true, cache: true, downloads: false };
-        const labels = { history: 'Browsing history', cookies: 'Cookies & site data', cache: 'Cached images & files', downloads: 'Download list' };
-        const range = el('select', {}, el('option', { value: 1 }, 'Last hour'), el('option', { value: 24 }, 'Last 24 hours'), el('option', { value: 168 }, 'Last 7 days'), el('option', { value: 0, selected: true }, 'All time'));
-        return group('', el('div', { class: 'checks' }, Object.keys(boxes).map((k) => el('label', {}, el('input', { type: 'checkbox', checked: boxes[k], onchange: (e) => { boxes[k] = e.target.checked; } }), labels[k]))),
-          row('Time range', '', range),
-          row('', '', el('button', { class: 'btn danger', onclick: async () => { await call('data:clear', { ...boxes, range: +range.value }); toast('Cleared'); } }, 'Clear data')));
-      })()),
+  // ---- backup ------------------------------------------------------------------------------------------
+  function backupSection() {
+    const pass = el('input', { type: 'password', placeholder: 'Passphrase (8+ characters)', style: 'width:260px', autocomplete: 'off' });
+    const inc = { settings: true, bookmarks: true, workspaces: true, permissions: true, rules: true, history: false };
+    const labels = { settings: 'Settings & shortcuts', bookmarks: 'Bookmarks', workspaces: 'Workspaces & snapshots', permissions: 'Site permissions', rules: 'Your filter rules', history: 'Browsing history' };
+    const out = el('div', { class: 'dim', style: 'margin-top:10px' });
+    return el('div', { class: 'panelbox' }, el('div', { class: 'checks' }, Object.keys(inc).map((k) => el('label', {}, el('input', { type: 'checkbox', checked: inc[k], onchange: (e) => { inc[k] = e.target.checked; } }), labels[k]))),
+      el('div', { class: 'row', style: 'padding:0 16px' }, pass,
+        el('button', { class: 'btn primary', onclick: async () => { try { const r = await call('backup:export', { passphrase: pass.value, include: inc }); out.textContent = r.canceled ? '' : 'Saved to ' + r.file; } catch (e) { out.textContent = String(e.message).replace(/^.*Error: /, ''); out.className = 'danger-text'; } } }, 'Export encrypted backup…'),
+        el('button', { class: 'btn', onclick: async () => { try { const r = await call('backup:import', { passphrase: pass.value }); out.className = 'dim'; out.textContent = r.canceled ? '' : 'Imported: ' + Object.entries(r.counts).map(([k, n]) => `${n} ${k}`).join(', '); } catch (e) { out.className = 'danger-text'; out.textContent = String(e.message).replace(/^.*Error: /, ''); } } }, 'Import backup…')),
+      el('div', { style: 'padding:0 16px' }, out));
+  }
 
-      sect('lists', 'Filter lists', 'Nevix ships with a compact built-in list. Add bigger community lists if you want maximum coverage — they are only downloaded when you enable them.',
-        group('', row('Built-in rules', 'Peter Lowe’s ad-server list + Nevix core rules. Always on while blocking is enabled.', el('span', { class: 'dim' }, num(cfg.listCount) + ' active')),
-          ...cfg.filterLists.map((def) => {
-            const st = cfg.privacy.lists.find((l) => l.id === def.id) || { enabled: false, updated: 0 };
-            const sw = el('div', { class: 'switch' + (st.enabled ? ' on' : '') });
-            sw.onclick = async () => {
-              const lists = cfg.privacy.lists.map((l) => (l.id === def.id ? { ...l, enabled: !l.enabled } : l));
-              await set('privacy.lists', lists); cfg.privacy.lists = lists; sw.classList.toggle('on');
-              if (lists.find((l) => l.id === def.id).enabled) { toast('Downloading…'); const r = await call('lists:update'); toast(r.every((x) => x.ok) ? 'Lists updated' : 'Some lists failed'); build(); }
-              else build();
-            };
-            return row(def.name, st.updated ? 'Updated ' + new Date(st.updated).toLocaleDateString() : def.url.replace(/^https:\/\//, ''), sw);
-          }),
-          row('', '', el('button', { class: 'btn', onclick: async () => { toast('Updating…'); const r = await call('lists:update'); toast(r.length ? (r.every((x) => x.ok) ? 'Lists updated' : 'Some lists failed') : 'No optional lists enabled'); build(); } }, 'Update lists now')))),
+  // ---- rendering ---------------------------------------------------------------------------------------
+  async function renderEntry(s) {
+    const row = el('div', { class: 'setting' + (highlight && (s.key === highlight || s.action === highlight || s.title === highlight) ? ' hl' : ''), 'data-key': s.key || s.action || '' });
+    if (s.type === 'shortcuts') return el('div', {}, el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, s.title), el('div', { class: 'd' }, s.description))), await shortcutsSection());
+    if (s.type === 'backup') return el('div', {}, el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, s.title), el('div', { class: 'd' }, s.description))), backupSection());
+    const disabledByFlag = s.flag && !s.flagOn;
+    row.append(el('div', { class: 'txt' }, el('div', { class: 'l' }, s.title, s.restart ? el('span', { class: 'badge' }, 'restart') : null, disabledByFlag ? el('span', { class: 'badge warn' }, 'turned off by a flag') : null),
+      el('div', { class: 'd' }, s.description)),
+      el('div', { class: 'ctl' }, s.type === 'info' ? null : control(s), s.key ? resetBtn(s) : null));
+    if (disabledByFlag) row.style.opacity = '.6';
+    if (s.action && inline === s.action) {
+      const panel = s.action === 'clear-data' ? clearPanel() : importPanel();
+      return el('div', {}, row, panel);
+    }
+    return row;
+  }
 
-      sect('sites', 'Site settings', 'Per-site exceptions.',
-        group('Shields turned off for', Object.keys(cfg.siteShields).length ? el('div', { class: 'chips' }, Object.keys(cfg.siteShields).map((h) => el('span', { class: 'chip' }, h, el('button', { title: 'Turn shields back on', onclick: async () => { await call('siteShields:remove', h); build(); } }, '×')))) : el('div', { class: 'setting dim' }, 'None — shields are up everywhere.')),
-        group('Saved permissions', Object.keys(cfg.sitePermissions).length ? Object.entries(cfg.sitePermissions).map(([h, perms]) => el('div', { class: 'setting' }, el('div', { class: 'txt' }, el('div', { class: 'l' }, h), el('div', { class: 'd' }, Object.entries(perms).map(([k, v]) => k + ': ' + v).join(' · '))), el('button', { class: 'btn sm', onclick: async () => { await call('sitePermissions:remove', h); build(); } }, 'Reset'))) : el('div', { class: 'setting dim' }, 'No saved permissions. Nevix asks each time.'))),
-
-      sect('downloads', 'Downloads', '',
-        group('', row('Save files to', g.downloadDir || 'System downloads folder', el('button', { class: 'btn', onclick: async () => { const d = await call('download:dir'); if (d) build(); } }, 'Change…')),
-          toggle('general.askDownloadLocation', 'Ask where to save each file'))),
-
-      sect('shortcuts', 'Keyboard shortcuts', '', el('div', { class: 'group' }, el('table', { class: 'keys' }, ...[
-        ['Command palette', 'K'], ['New tab', 'T'], ['New window', 'N'], ['New private window', 'Shift+N'], ['New isolated tab', 'Alt+N'], ['Close tab', 'W'], ['Reopen closed tab', 'Shift+T'],
-        ['Focus address bar', 'L'], ['Find in page', 'F'], ['Bookmark page', 'D'], ['Reader mode', 'Alt+R'], ['Vertical tabs', 'Shift+E'], ['Next / previous tab', 'Ctrl+Tab / Ctrl+Shift+Tab'],
-        ['Go to tab 1–8 / last', '1…9'], ['Zoom in / out / reset', '+ / − / 0'], ['History', 'H'], ['Downloads', 'J'], ['Screenshot', 'Shift+S'], ['Copy clean link', 'Shift+C'], ['Developer tools', 'F12'],
-      ].map(([a, k]) => el('tr', {}, el('td', {}, a), el('td', {}, ...k.split(' / ').map((c) => el('span', {}, el('kbd', {}, c.startsWith('Ctrl+') || c.startsWith('F') || c === '…' ? c : MOD + c), ' ')))))))),
-
-      sect('about', 'About Nevix', '',
-        group('', row('Version', '', el('span', {}, info.version)), row('Engine', 'Chromium ' + info.chrome + ' · Electron ' + info.electron, el('span', { class: 'dim' }, info.platform)),
-          row('Profile folder', info.userData, null)),
-        group('Our promise', el('div', { class: 'setting' }, el('div', { class: 'txt d', style: 'font-size:13.5px;line-height:1.6' },
-          'No accounts. No sync servers. No telemetry, crash reports or usage pings. No “sponsored” tiles. Nevix talks to the network only when you load a page (and, if you enable optional filter lists, to download them). Everything else stays on this device.')))),
-    ];
-
-    const nav = el('nav', {}, el('h2', {}, 'Settings'), ...[['privacy', 'shield', 'Privacy & shields'], ['general', 'gear', 'General'], ['appearance', 'eye', 'Appearance'], ['search', 'search', 'Search'], ['data', 'trash', 'Clear data'], ['lists', 'tag', 'Filter lists'], ['sites', 'globe', 'Site settings'], ['downloads', 'download', 'Downloads'], ['shortcuts', 'bolt', 'Shortcuts'], ['about', 'lock', 'About']]
-      .map(([id, ic, label]) => el('a', { 'data-id': id, onclick: () => { history.replaceState(null, '', '#' + id); show(id); } }, icon(ic), label)));
-    const main = el('main', {}, ...sections);
+  async function render() {
+    const entries = D.schema.filter((s) => (q ? (s.title + ' ' + (s.description || '') + ' ' + s.category).toLowerCase().includes(q.toLowerCase()) : s.category === cat));
+    const search = el('input', { type: 'search', placeholder: 'Search all settings', value: q, 'aria-label': 'Search settings' });
+    search.addEventListener('input', () => { q = search.value; render().then(() => { const s = $('input[type=search]'); s.focus(); s.setSelectionRange(q.length, q.length); }); });
+    const nav = el('nav', { class: 'cats' }, el('h2', {}, 'Settings'), D.categories.map((c) => el('a', { class: !q && c === cat ? 'on' : '', onclick: () => { q = ''; cat = c; history.replaceState(null, '', '#' + c); render(); } }, c)));
+    const rows = [];
+    let lastCat = '';
+    for (const s of entries) {
+      if (q && s.category !== lastCat) { rows.push(el('div', { class: 'catlabel' }, s.category)); lastCat = s.category; }
+      rows.push(await renderEntry(s));
+    }
+    // group consecutive entries into cards
+    const groups = [];
+    let cur = null;
+    for (const r of rows) { if (r.classList && r.classList.contains('catlabel')) { groups.push(r); cur = null; continue; } if (!cur) { cur = el('div', { class: 'group', style: 'margin-bottom:14px' }); groups.push(cur); } cur.append(r); }
+    const main = el('main', {}, el('div', { class: 'searchbar' }, search), el('h1', { style: 'font:600 20px var(--font-mono);margin-bottom:14px' }, q ? `Results for “${q}”` : cat), ...(groups.length ? groups : [el('div', { class: 'empty' }, 'No settings match.')]));
     root.replaceChildren(nav, main);
-    show((location.hash || '#privacy').slice(1));
+    if (highlight) { const h = main.querySelector('.hl'); if (h) h.scrollIntoView({ block: 'center' }); highlight = ''; }
   }
 
-  function show(id) {
-    const secs = [...document.querySelectorAll('main section')];
-    const valid = secs.some((s) => s.id === id);
-    const target = valid ? id : 'privacy';
-    for (const s of secs) s.style.display = s.id === target ? '' : 'none';
-    for (const a of document.querySelectorAll('nav a')) a.classList.toggle('on', a.dataset.id === target);
-    window.scrollTo(0, 0);
+  async function load() {
+    D = await call('settings:schema');
+    const hash = decodeURIComponent((location.hash || '').slice(1));
+    if (D.categories.includes(hash)) cat = hash; else if (hash === 'privacy') cat = 'Privacy'; else if (hash === 'data') { cat = 'Privacy'; inline = 'clear-data'; }
+    highlight = params.get('s') || '';
+    await render();
   }
-  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
-  build();
-  window.nevix.onChange((t) => { if (t === 'settings' && !document.activeElement.matches('input, select')) { const h = location.hash; build().then(() => { location.hash = h; }); } });
+  window.addEventListener('hashchange', load);
+  load();
+  window.nevix.onChange((t) => { if (t === 'settings' && !document.activeElement.matches('input, select')) load(); });
 })();
