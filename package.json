@@ -1,0 +1,108 @@
+{
+  "name": "nevix-browser",
+  "productName": "Nevix",
+  "version": "1.0.0",
+  "description": "Nevix \u2014 a fast, private, bloat-free browser.",
+  "main": "src/main/index.js",
+  "license": "MIT",
+  "author": "deadbytee-del",
+  "scripts": {
+    "start": "electron . --enable-features=UseOzonePlatform --ozone-platform-hint=auto",
+    "start:dev": "electron . --user-data-dir=./.dev-profile",
+    "test": "node test/unit.js",
+    "test:e2e": "sh test/run-e2e.sh",
+    "dist": "electron-builder",
+    "dist:dir": "electron-builder --dir",
+    "icon": "xvfb-run -a electron scripts/make-icon.js --no-sandbox --disable-gpu"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "homepage": "https://github.com/deadbytee-del/Nevix-Browser",
+  "build": {
+    "appId": "app.nevix.browser",
+    "productName": "Nevix",
+    "copyright": "Copyright \u00a9 2026 deadbytee-del",
+    "files": [
+      "src/**/*",
+      "assets/icon.png",
+      "assets/icon.svg",
+      "package.json",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "electronLanguages": [
+      "en-US"
+    ],
+    "protocols": [
+      {
+        "name": "Web site",
+        "schemes": [
+          "http",
+          "https"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.png",
+      "extendInfo": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "Web site",
+            "CFBundleURLSchemes": [
+              "http",
+              "https"
+            ]
+          }
+        ]
+      }
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network;WebBrowser",
+      "icon": "assets/icon.png",
+      "maintainer": "deadbytee-del",
+      "mimeTypes": [
+        "x-scheme-handler/http",
+        "x-scheme-handler/https",
+        "text/html"
+      ],
+      "desktop": {
+        "entry": {
+          "Name": "Nevix",
+          "Comment": "Fast, private, bloat-free browser",
+          "StartupWMClass": "Nevix",
+          "Keywords": "browser;web;internet;privacy;"
+        }
+      },
+      "executableName": "nevix"
+    },
+    "publish": null
+  }
+}

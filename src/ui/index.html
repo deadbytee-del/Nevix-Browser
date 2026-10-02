@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nevix</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div id="side-head">
+      <button class="ib" id="side-newtab" title="New tab (Ctrl+T)"></button>
+      <button class="ib" id="side-collapse" title="Collapse sidebar"></button>
+    </div>
+    <div id="side-pins"></div>
+    <div id="side-tabs"></div>
+    <div id="side-foot">
+      <button class="ib" data-page="downloads" title="Downloads"></button>
+      <button class="ib" data-page="history" title="History"></button>
+      <button class="ib" data-page="settings" title="Settings"></button>
+    </div>
+  </aside>
+  <header id="top">
+    <div id="tabstrip"><div id="tabs"></div><button class="ib" id="newtab" title="New tab (Ctrl+T)"></button><div id="strip-fill"></div></div>
+    <div id="toolbar">
+      <div class="grp">
+        <button class="ib" id="back" title="Back"></button>
+        <button class="ib" id="forward" title="Forward"></button>
+        <button class="ib" id="reload" title="Reload"></button>
+      </div>
+      <div id="omni">
+        <button id="siteinfo" title="Site information & shields"></button>
+        <div id="omni-text"><input id="url" spellcheck="false" autocomplete="off" placeholder="Search or enter address"><div id="url-display"></div></div>
+        <span id="zoom" hidden></span>
+        <button class="ib sm" id="star" title="Bookmark this page (Ctrl+D)"></button>
+        <div id="toast"></div>
+      </div>
+      <div class="grp">
+        <button class="ib" id="shield" title="Shields"><span id="shield-count" hidden></span></button>
+        <button class="ib" id="dl" title="Downloads"><span id="dl-dot" hidden></span></button>
+        <button class="ib" id="menu" title="Menu"></button>
+      </div>
+    </div>
+    <div id="bmbar"></div>
+    <div id="infobar" hidden></div>
+  </header>
+  <div id="overlay" hidden><div id="backdrop"></div><div id="panel"></div></div>
+</div>
+<script src="ui.js"></script>
+</body>
+</html>
