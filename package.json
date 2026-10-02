@@ -70,15 +70,34 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
-      "icon": "assets/app-icon.png"
+      "icon": "assets/app-icon.png",
+      "executableName": "Nevix"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "perMachine": false
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Nevix",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh",
+      "artifactName": "Nevix-Setup.exe",
+      "uninstallDisplayName": "Nevix"
     },
     "linux": {
       "target": [
@@ -103,6 +122,25 @@
       },
       "executableName": "nevix"
     },
-    "publish": null
+    "publish": null,
+    "portable": {
+      "artifactName": "Nevix-Portable.exe"
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "html",
+          "htm",
+          "xhtml"
+        ],
+        "name": "HTML document",
+        "role": "Viewer"
+      },
+      {
+        "ext": "pdf",
+        "name": "PDF document",
+        "role": "Viewer"
+      }
+    ]
   }
 }

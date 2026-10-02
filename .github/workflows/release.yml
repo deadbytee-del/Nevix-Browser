@@ -21,6 +21,7 @@ jobs:
           path: |
             dist/*.AppImage
             dist/*.deb
-            dist/*.exe
+            dist/Nevix-Setup.exe
+            dist/Nevix-Portable.exe
             dist/*.dmg
             dist/*.zip

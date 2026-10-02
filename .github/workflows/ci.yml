@@ -16,3 +16,35 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y xvfb imagemagick libgbm1 libasound2t64 libnss3 libgtk-3-0t64
           sudo -E env "PATH=$PATH" sh test/run-e2e.sh
+  windows-package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx electron-builder --win --x64 --publish never
+      - name: Verify artifacts
+        shell: pwsh
+        run: |
+          foreach ($f in 'dist/Nevix-Setup.exe','dist/Nevix-Portable.exe','dist/win-unpacked/Nevix.exe') { if (-not (Test-Path $f)) { throw "missing $f" } }
+      - name: Silent install, launch check, uninstall
+        shell: pwsh
+        run: |
+          $dir = "$env:RUNNER_TEMP\NevixInstall"
+          Start-Process dist/Nevix-Setup.exe -ArgumentList '/S',"/D=$dir" -Wait
+          if (-not (Test-Path "$dir\Nevix.exe")) { throw 'installer did not install Nevix.exe' }
+          if (-not (Test-Path 'HKCU:\Software\Clients\StartMenuInternet\Nevix')) { throw 'browser not registered' }
+          $p = Start-Process "$dir\Nevix.exe" -ArgumentList '--safe-mode','about:blank' -PassThru
+          Start-Sleep 8
+          if ($p.HasExited) { throw "Nevix exited early: $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+          Start-Process "$dir\Uninstall Nevix.exe" -ArgumentList '/S' -Wait
+          Start-Sleep 3
+          if (Test-Path "$dir\Nevix.exe") { throw 'uninstall left Nevix.exe' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nevix-windows
+          path: |
+            dist/Nevix-Setup.exe
+            dist/Nevix-Portable.exe
